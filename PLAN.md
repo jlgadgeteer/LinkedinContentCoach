@@ -37,18 +37,20 @@ The design output lives in `design/` and is treated as source of truth. The hand
 
 **Acceptance:** with `POSTGRES_URL` set in `.env.local`, the app boots and the tables exist. `psql` shows the schema.
 
-## Phase 3: Auth (Auth.js v5 + middleware)
+## Phase 3: Auth (Auth.js v5 + middleware) ✅
 
 **Goal:** the app is gated behind a single-password login.
 
-- [ ] Create `lib/auth.ts` with Auth.js v5 setup:
+- [x] Create `lib/auth.ts` with Auth.js v5 setup:
   - Credentials provider that calls a `verifyPassword(input)` function
   - JWT session strategy
   - `signIn` callback rate-limits failed attempts in-memory (5/min/IP)
-- [ ] Create `app/api/auth/[...nextauth]/route.ts` per Auth.js v5 docs (Node runtime).
-- [ ] Create `middleware.ts` at the repo root: protect all routes except `/login`, `/api/auth/*`, and static assets. Redirect unauthenticated requests to `/login` with a `from` query param.
-- [ ] Create `app/login/page.tsx` per the design: centered 420px card, "Welcome back." serif h1, password input, full-width primary button "Continue", footer note "Self-hosted. Not a public service." Bottom-right repo link.
-- [ ] On first ever login (no `password_hash` row in `config` yet), accept the password from `AUTH_PASSWORD` env var, hash it, store it, then log the user in. Subsequent logins compare against the stored hash.
+- [x] Create `app/api/auth/[...nextauth]/route.ts` per Auth.js v5 docs (Node runtime).
+- [x] Create `middleware.ts` at the repo root: protect all routes except `/login`, `/api/auth/*`, and static assets. Redirect unauthenticated requests to `/login` with a `from` query param.
+- [x] Create `app/login/page.tsx` per the design: centered 420px card, "Welcome back." serif h1, password input, full-width primary button "Continue", footer note "Self-hosted. Not a public service." Bottom-right repo link.
+- [x] On first ever login (no `password_hash` row in `config` yet), accept the password from `AUTH_PASSWORD` env var, hash it, store it, then log the user in. Subsequent logins compare against the stored hash.
+- [x] Enforce ADR-002 mitigation: 12-character minimum on the bootstrap password (`AUTH_PASSWORD`). Mismatched / too-short env values fail closed.
+- [x] Split the config so middleware loads only the edge-safe stub (`lib/auth.config.ts`); the Credentials provider + bcrypt + DB stay in `lib/auth.ts` (Node-only).
 
 **Acceptance:** unauthenticated requests redirect to `/login`. Wrong password fails with a calm specific error. Correct password lands on `/` and the session cookie persists across reloads. After 5 failures from one IP, return a `429` for 60 seconds.
 
