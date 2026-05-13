@@ -8,15 +8,16 @@ The repo contains a working v1 scaffold that uses IndexedDB for client-side stat
 
 The design output lives in `design/` and is treated as source of truth. The handoff doc in `design/HANDOFF.md` is comprehensive.
 
-## Phase 1: Foundation (design tokens + dependencies)
+## Phase 1: Foundation (design tokens + dependencies) ✅
 
 **Goal:** the app boots with the design system applied, using the new dependency set.
 
-- [ ] Update `package.json` to add: `drizzle-orm`, `drizzle-kit` (devDep), `@vercel/postgres`, `next-auth@5.0.0-beta.x`, `bcryptjs`, `@types/bcryptjs` (devDep). Keep existing AI SDK and Zod deps.
-- [ ] Replace `app/globals.css` with the contents of `design/tokens.css`. This gives Tailwind v4 the full `@theme` block and dark-mode variant.
-- [ ] Add Google Fonts loading (Inter 400/500/600, Source Serif 4 400/500 with italic, JetBrains Mono 400/500) via `next/font` in `app/layout.tsx`.
-- [ ] Update `app/layout.tsx` per design: brand mark in header (serif "Content Coach" + mono version subtitle), narrow content cap, footer note.
-- [ ] Run `npm run dev` and verify both light and dark mode render with the warm paper aesthetic.
+- [x] Update `package.json` to add: `drizzle-orm`, `drizzle-kit` (devDep), `@vercel/postgres`, `next-auth@5.0.0-beta.x`, `bcryptjs`, `@types/bcryptjs` (devDep). Keep existing AI SDK and Zod deps.
+- [x] Replace `app/globals.css` with the contents of `design/tokens.css`. This gives Tailwind v4 the full `@theme` block and dark-mode variant.
+- [x] Add Google Fonts loading (Inter 400/500/600, Source Serif 4 400/500 with italic, JetBrains Mono 400/500) via `next/font` in `app/layout.tsx`.
+- [x] Update `app/layout.tsx` per design: brand mark in header (serif "Content Coach" + mono version subtitle), narrow content cap, footer note.
+- [x] Run `npm run dev` and verify both light and dark mode render with the warm paper aesthetic.
+- [x] Bonus, per user direction on day 1: ship a `ThemeToggle` component (System / Light / Dark, words only, mono uppercase) with localStorage persistence and a no-flash inline script in `<head>`. Manual choice beats the OS preference; no-JS users still get OS-appropriate dark via a `:not([data-theme])` media-query fallback.
 
 **Acceptance:** open `http://localhost:3000`. The page should feel like a writer's tool, not the current v1 inline-styled scaffold. Toggle OS dark mode and verify the theme switches.
 
