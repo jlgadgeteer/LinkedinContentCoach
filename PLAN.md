@@ -67,19 +67,20 @@ The design output lives in `design/` and is treated as source of truth. The hand
 
 **Acceptance:** fresh deploy → login → wizard → 3 steps → workspace. Each step's data persists. Mid-wizard reload returns to the same step.
 
-## Phase 5: UI primitives
+## Phase 5: UI primitives ✅ (built before Phase 4 by design judgment, so the wizard composes them)
 
 **Goal:** the component library from `design/primitives.html` exists as React components.
 
-- [ ] Create `components/ui/button.tsx` with variants: `primary | secondary | ghost`, sizes: `sm | default | lg`. Streaming state: replaces label with `<dot-pulse> + label`, disabled.
-- [ ] `components/ui/input.tsx`: text, password, select variants. Border `border-strong` at rest, `accent` on focus with `accent-soft` 3px ring. Use `:focus-visible`, not `:focus`.
-- [ ] `components/ui/textarea.tsx`: prose and mono variants. Mono uses JetBrains Mono 13/21.
-- [ ] `components/ui/card.tsx`: static and interactive. Interactive lifts border on hover, no shadow, no transform.
-- [ ] `components/ui/label.tsx`: 13/20 medium, optional hint slot.
-- [ ] `components/ui/page-header.tsx`, `components/ui/section-header.tsx`.
-- [ ] `components/ui/badge.tsx`: variants neutral/success/danger/accent. 24px high, 4px radius, paired 6px colored dot.
-- [ ] `components/output/output-block.tsx`: live/done/fail states. Sits on `sunken` surface. Pulsing dot, blinking caret per design.
-- [ ] `components/output/post-block.tsx`: serif rendering of `<post>` tags, 3px terracotta left border, mono meta line.
+- [x] Create `components/ui/button.tsx` with variants: `primary | secondary | ghost`, sizes: `sm | default | lg`. Streaming state: replaces label with `<dot-pulse> + label`, disabled.
+- [x] `components/ui/input.tsx`: text, password, select variants. Border `border-strong` at rest, `accent` on focus with `accent-soft` 3px ring. Use `:focus-visible`, not `:focus`. (`select` lives in `components/ui/select.tsx` as a sibling for clarity.)
+- [x] `components/ui/textarea.tsx`: prose and mono variants. Mono uses JetBrains Mono 13/21.
+- [x] `components/ui/card.tsx`: static and interactive. Interactive lifts border on hover, no shadow, no transform.
+- [x] `components/ui/label.tsx`: 13/20 medium, optional hint slot.
+- [x] `components/ui/page-header.tsx`, `components/ui/section-header.tsx` (both exported from `components/ui/page-header.tsx`).
+- [x] `components/ui/badge.tsx`: variants neutral/success/danger/accent. 24px high, 4px radius, paired 6px colored dot.
+- [x] `components/output/output-block.tsx`: live/done/fail states. Sits on `sunken` surface. Pulsing dot, blinking caret per design.
+- [x] `components/output/post-block.tsx`: serif rendering of `<post>` tags, 3px terracotta left border, mono meta line.
+- [x] Ported the full primitive + layout CSS from `design/screens.css` into `app/globals.css` so one source of truth drives styling; React components are thin wrappers that pass class names through.
 
 **Acceptance:** open a `/dev/primitives` route (or storybook-style page) showing every primitive in both modes, matching `design/primitives.html`.
 
