@@ -21,19 +21,19 @@ The design output lives in `design/` and is treated as source of truth. The hand
 
 **Acceptance:** open `http://localhost:3000`. The page should feel like a writer's tool, not the current v1 inline-styled scaffold. Toggle OS dark mode and verify the theme switches.
 
-## Phase 2: Database schema + migration
+## Phase 2: Database schema + migration ✅
 
 **Goal:** the app has a Postgres backing store with the schema defined.
 
-- [ ] Create `lib/db/schema.ts` with these tables (single-tenant, no `users` table needed):
+- [x] Create `lib/db/schema.ts` with these tables (single-tenant, no `users` table needed):
   - `config` — singleton row holding: `password_hash`, `provider`, `model`, `encrypted_api_key`, `setup_completed_at`, `last_verified_at`
   - `voice_profile` — singleton: `markdown`, `updated_at`
   - `posts` — many rows: `id`, `external_id`, `published_at`, `url`, `hook`, `text`, `word_count`, `created_at`
   - `recent_actions` — for the workspace's "Recent" section: `id`, `at`, `kind` (DRAFT|IDEATE|SEARCH|QC), `title`, `ref`
-- [ ] Create `lib/db/index.ts` exporting a configured Drizzle client using `@vercel/postgres`.
-- [ ] Create `lib/db/migrate.ts` exporting an `ensureSchema()` function that runs idempotent `CREATE TABLE IF NOT EXISTS` for each table. This runs on app boot.
-- [ ] Hook `ensureSchema()` into a Next.js server-side bootstrap (e.g., called from a server component's `cache()`'d function).
-- [ ] Delete `lib/db.ts` (the Dexie file). Remove `dexie` and `dexie-react-hooks` from deps.
+- [x] Create `lib/db/index.ts` exporting a configured Drizzle client using `@vercel/postgres`.
+- [x] Create `lib/db/migrate.ts` exporting an `ensureSchema()` function that runs idempotent `CREATE TABLE IF NOT EXISTS` for each table. This runs on app boot.
+- [x] Hook `ensureSchema()` into a Next.js server-side bootstrap (via `instrumentation.ts`, which Next.js calls once per Node worker on cold start; skipped on edge and when `POSTGRES_URL` is unset).
+- [x] Delete `lib/db.ts` (the Dexie file). Remove `dexie` and `dexie-react-hooks` from deps. Replaced v1 `app/page.tsx`, `app/settings/page.tsx`, and `components/workspace.tsx` with minimal placeholders for now (Phases 6 and 8 land the designed versions).
 
 **Acceptance:** with `POSTGRES_URL` set in `.env.local`, the app boots and the tables exist. `psql` shows the schema.
 
