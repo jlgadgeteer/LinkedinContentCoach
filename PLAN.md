@@ -86,16 +86,17 @@ Resume behavior: a visit to `/setup` (no `?step=` hint) derives the next-needed 
 
 **Acceptance:** open a `/dev/primitives` route (or storybook-style page) showing every primitive in both modes, matching `design/primitives.html`.
 
-## Phase 6: Workspace (home + sidebar)
+## Phase 6: Workspace (home + sidebar) ✅
 
 **Goal:** the workspace screen matches the design in both empty and populated states.
 
-- [ ] Create `components/workspace/sidebar.tsx`: 220px fixed-width nav with links to the four actions (`Draft`, `Ideate`, `Search`, `Quality check`), each with its `⌘1`–`⌘4` mono hint, plus a Settings link at the bottom. Brand mark at top.
-- [ ] Update `app/page.tsx`: page header with mono eyebrow "Workspace", h1 "What are you writing today?", right-side badges showing post count + voice profile status.
-- [ ] Action cards: 2×2 grid below the header. Each card has the action title (17px), one-line description, mono `⌘N` shortcut top-right. Use the interactive card variant.
-- [ ] Empty state footer: "Nothing here yet. Your drafts and checks will show up below once you run one."
-- [ ] Populated state: add a "Recent" section header below the cards with `View all` ghost button. List rows: `[when] [title] [kind]` separated by hairlines. Kind rendered as mono uppercase faint.
-- [ ] Keyboard shortcuts: `⌘1`–`⌘4` navigate to the action pages. Implement at the layout level so they work from any screen.
+- [x] Create `components/workspace/sidebar.tsx`: 220px fixed-width nav with links to the four actions (`Draft`, `Ideate`, `Search`, `Quality check`), each with its `⌘1`–`⌘4` mono hint, plus a Settings link at the bottom. Brand mark at top.
+- [x] Update `app/page.tsx`: page header with mono eyebrow "Workspace", h1 "What are you writing today?", right-side badges showing post count + voice profile status.
+- [x] Action cards: 2×2 grid below the header. Each card has the action title (17px), one-line description, mono `⌘N` shortcut top-right. Use the interactive card variant.
+- [x] Empty state footer: "Nothing here yet. Your drafts and checks will show up below once you run one."
+- [x] Populated state: add a "Recent" section header below the cards with `View all` ghost button. List rows: `[when] [title] [kind]` separated by hairlines. Kind rendered as mono uppercase faint.
+- [x] Keyboard shortcuts: `⌘1`–`⌘4` navigate to the action pages. Implement at the layout level so they work from any screen.
+- [x] Restructured routes into two route groups: `(app)/` for the sidebar-wrapped pages (workspace, settings, dev) and `(bare)/` for full-bleed pages (login, setup). The ThemeToggle moves into the sidebar footer on app pages and the top bar on bare pages.
 
 **Acceptance:** match `design/screens.html` sections 3 and 4 in both modes. Keyboard shortcuts work from any page.
 

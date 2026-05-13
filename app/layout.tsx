@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
-import Link from "next/link";
-import { ThemeToggle } from "@/components/theme-toggle";
 import "./globals.css";
 
 const inter = Inter({
@@ -48,59 +46,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_THEME_SCRIPT }} />
       </head>
-      <body>
-        <div
-          style={{
-            minHeight: "100vh",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <header
-            style={{
-              padding: "20px 32px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: 24,
-            }}
-          >
-            <Link
-              href="/"
-              style={{ textDecoration: "none", color: "inherit" }}
-              aria-label="Content Coach, home"
-            >
-              <div className="brand">
-                Content Coach
-                <small>v0.2 · personal</small>
-              </div>
-            </Link>
-            <ThemeToggle />
-          </header>
-
-          <main
-            style={{
-              flex: 1,
-              padding: "32px",
-              width: "100%",
-            }}
-          >
-            {children}
-          </main>
-
-          <footer
-            style={{
-              padding: "20px 32px 28px",
-              fontFamily: "var(--font-mono)",
-              fontSize: 11,
-              letterSpacing: "0.04em",
-              color: "var(--color-fg-faint)",
-            }}
-          >
-            Self-hosted. Your API key and post history live in your own Vercel project.
-          </footer>
-        </div>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
