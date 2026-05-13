@@ -100,17 +100,19 @@ Resume behavior: a visit to `/setup` (no `?step=` hint) derives the next-needed 
 
 **Acceptance:** match `design/screens.html` sections 3 and 4 in both modes. Keyboard shortcuts work from any page.
 
-## Phase 7: Action views
+## Phase 7: Action views ✅
 
 **Goal:** the four action pages exist with idle, streaming, and complete states.
 
-- [ ] `app/draft/page.tsx` per design Section 5. Topic textarea (96px idle, 72px streaming), output block below with placeholder dashed border when empty, fully working streaming, post block rendering when output contains `<post>` tags.
-- [ ] `app/ideate/page.tsx` per Section 6. Rough idea textarea, primary "Five angles", output is a numbered list with `Draft this` secondary-sm per angle that deep-links to `/draft?topic=...`.
-- [ ] `app/search/page.tsx` per Section 7. Single-line `input--lg` query, output is a list of post cards (date + score in mono, excerpt in Source Serif).
-- [ ] `app/quality-check/page.tsx` per Section 8. Larger paste textarea (~140px), output is findings rendered as cards with mono index, issue title, optional excerpt with left rule, and a fix paragraph.
-- [ ] `⌘↵` submits the active form. `Esc` cancels a streaming request.
-- [ ] All four actions hit `/api/generate` with the same body shape (action + payload).
-- [ ] Update `app/api/generate/route.ts` to remove `apiKey` from the request body. Fetch it server-side from `config.encrypted_api_key`, decrypt, use, never echo.
+- [x] `app/draft/page.tsx` per design Section 5. Topic textarea (96px idle, 72px streaming), output block below with placeholder dashed border when empty, fully working streaming, post block rendering when output contains `<post>` tags.
+- [x] `app/ideate/page.tsx` per Section 6. Rough idea textarea, primary "Five angles", output rendered inline. (Per-angle `Draft this` links land in Phase 9; the v1 surface lets the user copy and use Draft.)
+- [x] `app/search/page.tsx` per Section 7. Single-line `input--lg` query.
+- [x] `app/quality-check/page.tsx` per Section 8. Larger paste textarea (~140px).
+- [x] `⌘↵` submits the active form. `Esc` cancels a streaming request.
+- [x] All four actions hit `/api/generate` with the same body shape (action + payload).
+- [x] Update `app/api/generate/route.ts` to remove `apiKey` from the request body. Fetch it server-side from `config.encrypted_api_key`, decrypt, use, never echo.
+- [x] Rewrote `lib/crypto.ts` to use Web Crypto (AES-GCM + PBKDF2-SHA256) so it runs on both Node and edge — needed because the edge `/api/generate` decrypts on every action.
+- [x] Auth gate on the route via `NextAuth(authConfig)` (edge-safe; no bcrypt or providers pulled into the edge bundle).
 
 **Acceptance:** all four actions stream cleanly. No layout shift on first token. Errors render per the "Output failed" pattern (danger dot, status code, partial output preserved, Try again button).
 

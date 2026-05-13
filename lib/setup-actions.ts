@@ -28,7 +28,7 @@ export async function saveProviderAction(
   const testErr = await testProvider(parsed.data);
   if (testErr) return { error: `Provider rejected the test request. ${testErr}` };
 
-  const encrypted = encryptApiKey(parsed.data.apiKey);
+  const encrypted = await encryptApiKey(parsed.data.apiKey);
 
   await sql`
     INSERT INTO config (id, provider, model, encrypted_api_key, last_verified_at, updated_at)
