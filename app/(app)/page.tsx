@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { Banner } from "@/components/ui/banner";
 import { PageHeader, SectionHeader } from "@/components/ui/page-header";
 import { Button } from "@/components/ui/button";
 import { getSetupState } from "@/lib/setup";
@@ -42,9 +43,24 @@ export default async function WorkspacePage() {
   if (!setup.isComplete) redirect("/setup");
 
   const summary = await getWorkspaceSummary();
+  const showVoiceWarning = !summary.hasVoiceProfile;
 
   return (
     <div className="content--wide">
+      {showVoiceWarning ? (
+        <div style={{ marginBottom: 24 }}>
+          <Banner
+            tone="danger"
+            title="No voice profile loaded"
+            body="The model has no voice to imitate. Open Settings and paste a voice profile."
+            actions={
+              <Link href="/settings" className="btn btn--secondary btn--sm">
+                Open settings
+              </Link>
+            }
+          />
+        </div>
+      ) : null}
       <PageHeader
         eyebrow="Workspace"
         title="What are you writing today?"

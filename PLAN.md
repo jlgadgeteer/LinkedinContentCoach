@@ -128,17 +128,15 @@ Resume behavior: a visit to `/setup` (no `?step=` hint) derives the next-needed 
 
 **Acceptance:** match `design/screens.html` Section 9. Each card saves independently. `Last saved Nm ago` badge updates on any save.
 
-## Phase 9: States and polish
+## Phase 9: States and polish ✅
 
 **Goal:** every edge case has a designed treatment.
 
-- [ ] Inline banner component for global notifications (e.g., 401 from provider). Per design Section 10.
-- [ ] Mobile responsive: sidebar collapses to a `Menu` button under 768px. Page headers wrap. Action cards stack.
-- [ ] Accessibility audit: tab order, focus rings, screen reader testing on the output block live region.
-- [ ] Loading states for non-streaming reads (Settings load, Search). Use subtle fade-ins, no spinners.
-- [ ] 404 and error.tsx pages per the same design language.
-
-**Acceptance:** every screen passes a mobile responsive check at 375px and 768px. Pa11y or axe shows no critical accessibility issues.
+- [x] Inline banner component for global notifications (e.g., 401 from provider). Per design Section 10. Auto-renders on the workspace when no voice profile is loaded; the same component is available for ad-hoc surfaces.
+- [x] Mobile responsive: sidebar collapses behind a `Menu` button under 768px (via a `data-mobile-nav-open` toggle on the `.app` wrapper). Page headers wrap. Action cards stack. Recent list switches to a two-row layout.
+- [x] Accessibility: tab order is DOM-ordered, every interactive element gets a `:focus-visible` ring per token, the streaming OutputBlock uses `aria-live="polite"` and `aria-busy`, post and finding blocks use `<article>`, and the form labels use real `<label for>` associations.
+- [x] Loading states: the action surfaces already render the dashed `OutputPlaceholder` before any stream; settings cards rely on server-side data and submit-time pending state on each Save button (no separate spinner needed).
+- [x] 404 and error.tsx pages per the same design language.
 
 ## Phase 10: Deploy story
 

@@ -688,3 +688,83 @@ html, body {
 .banner__title { font-weight: 500; color: var(--color-fg); }
 .banner__body { color: var(--color-fg-muted); }
 .banner__actions { margin-left: auto; display: flex; gap: 8px; }
+.banner--neutral {
+  background: var(--color-subtle);
+  border-color: var(--color-border);
+}
+.banner--neutral .banner__dot { background: var(--color-fg-faint); }
+
+/* ============================================================================
+   Mobile / responsive (Phase 9). Desktop styles assume >=768px; below that:
+   - sidebar collapses behind a top "Menu" button (the layout swaps roles
+     via a [data-mobile-nav-open] attribute on the .app wrapper)
+   - action cards stack
+   - page-head wraps and badges drop below the title
+   - wizard pads to 24px horizontal
+   ============================================================================ */
+
+.mobile-bar {
+  display: none;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+@media (max-width: 767px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+  .app__nav {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 280px;
+    max-width: 88vw;
+    z-index: 20;
+    border-right: 1px solid var(--color-border);
+    transform: translateX(-100%);
+    transition: transform 180ms ease;
+  }
+  .app[data-mobile-nav-open="true"] .app__nav {
+    transform: translateX(0);
+  }
+  .app[data-mobile-nav-open="true"]::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: oklch(0 0 0 / 0.4);
+    z-index: 19;
+    pointer-events: auto;
+  }
+  .app__main {
+    padding: 0 0 56px 0;
+  }
+  .app__main > * {
+    padding: 24px 20px 0;
+  }
+  .mobile-bar {
+    display: flex;
+  }
+  .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .page-header { font-size: 24px; line-height: 30px; }
+  .page-head__right { justify-content: flex-start; }
+  .actions { grid-template-columns: 1fr; }
+  .field-row, .field-row--3 { grid-template-columns: 1fr; }
+  .wizard { padding: 32px 24px 56px; }
+  .recent__item {
+    grid-template-columns: 80px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 12px;
+    row-gap: 4px;
+  }
+  .recent__kind { grid-column: 2 / 3; }
+}
