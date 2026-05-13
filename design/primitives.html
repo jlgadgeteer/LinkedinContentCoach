@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Primitives — LinkedIn Content Coach</title>
+<meta name="viewport" content="width=1440" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  /* ============================================================
+     Tokens — verbatim from tokens.css. Defined twice (light root
+     + dark override on [data-mode="dark"]) so the side-by-side
+     comparison can render both modes in one document.
+     ============================================================ */
+  :root {
+    --color-bg:            oklch(0.985 0.005 70);
+    --color-surface:       oklch(0.995 0.003 70);
+    --color-subtle:        oklch(0.960 0.006 65);
+    --color-sunken:        oklch(0.940 0.007 65);
+    --color-border:        oklch(0.900 0.008 65);
+    --color-border-strong: oklch(0.800 0.010 60);
+    --color-fg:            oklch(0.220 0.012 55);
+    --color-fg-muted:      oklch(0.480 0.012 60);
+    --color-fg-faint:      oklch(0.620 0.012 60);
+    --color-accent:        oklch(0.530 0.130 35);
+    --color-accent-hover:  oklch(0.470 0.140 33);
+    --color-accent-soft:   oklch(0.950 0.025 40);
+    --color-accent-fg:     oklch(0.985 0.005 70);
+    --color-danger:        oklch(0.480 0.120 25);
+    --color-danger-soft:   oklch(0.955 0.020 25);
+    --color-success:       oklch(0.500 0.080 145);
+    --color-success-soft:  oklch(0.960 0.020 145);
+
+    --font-sans:  "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, sans-serif;
+    --font-serif: "Source Serif 4", "Iowan Old Style", "Charter", Georgia, serif;
+    --font-mono:  "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  [data-mode="dark"] {
+    --color-bg:            oklch(0.185 0.008 55);
+    --color-surface:       oklch(0.220 0.008 55);
+    --color-subtle:        oklch(0.255 0.009 55);
+    --color-sunken:        oklch(0.165 0.008 55);
+    --color-border:        oklch(0.310 0.010 55);
+    --color-border-strong: oklch(0.400 0.012 55);
+    --color-fg:            oklch(0.940 0.008 70);
+    --color-fg-muted:      oklch(0.720 0.010 65);
+    --color-fg-faint:      oklch(0.550 0.012 60);
+    --color-accent:        oklch(0.720 0.130 38);
+    --color-accent-hover:  oklch(0.780 0.130 38);
+    --color-accent-soft:   oklch(0.290 0.045 38);
+    --color-accent-fg:     oklch(0.165 0.008 55);
+    --color-danger:        oklch(0.700 0.130 28);
+    --color-danger-soft:   oklch(0.300 0.045 28);
+    --color-success:       oklch(0.720 0.090 145);
+    --color-success-soft:  oklch(0.280 0.030 145);
+  }
+
+  /* ============================================================
+     Reset / page chrome
+     ============================================================ */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: oklch(0.92 0.005 65); }
+  body {
+    font-family: var(--font-sans);
+    color: oklch(0.3 0.01 55);
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .doc-head {
+    padding: 40px 56px 28px;
+    border-bottom: 1px solid oklch(0.85 0.008 60);
+    background: oklch(0.96 0.005 65);
+  }
+  .doc-head .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: oklch(0.5 0.012 55);
+    margin: 0 0 10px;
+  }
+  .doc-head h1 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    font-size: 32px;
+    letter-spacing: -0.015em;
+    margin: 0;
+    color: oklch(0.22 0.012 55);
+  }
+  .doc-head p {
+    margin: 8px 0 0;
+    max-width: 720px;
+    color: oklch(0.45 0.012 55);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  /* ============================================================
+     Section: title bar spans full width, demo splits into
+     light (left) and dark (right). The grid keeps both columns
+     perfectly aligned by height.
+     ============================================================ */
+  .primitive {
+    border-top: 1px solid oklch(0.85 0.008 60);
+  }
+  .primitive:first-of-type { border-top: 0; }
+
+  .prim-head {
+    display: grid;
+    grid-template-columns: 280px 1fr 200px;
+    gap: 32px;
+    align-items: baseline;
+    padding: 28px 56px 18px;
+    background: oklch(0.96 0.005 65);
+    border-bottom: 1px solid oklch(0.85 0.008 60);
+  }
+  .prim-head .num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: oklch(0.5 0.012 55);
+  }
+  .prim-head .num strong {
+    color: oklch(0.22 0.012 55);
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: -0.005em;
+    text-transform: none;
+    margin-left: 8px;
+    font-family: var(--font-sans);
+  }
+  .prim-head .rationale {
+    color: oklch(0.4 0.012 55);
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 640px;
+  }
+  .prim-head .api {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: oklch(0.5 0.012 55);
+    text-align: right;
+  }
+
+  .prim-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .pane {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    padding: 36px 56px 40px;
+    min-height: 100%;
+  }
+  .pane + .pane { border-left: 1px solid oklch(0.35 0.01 55); }
+
+  .pane-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-fg-faint);
+    margin: 0 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pane-label::before {
+    content: "";
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: var(--color-fg-muted);
+  }
+
+  .variant-grid { display: flex; flex-direction: column; gap: 22px; }
+  .variant {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 20px;
+    align-items: center;
+  }
+  .variant-stack {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .v-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-fg-faint);
+    letter-spacing: 0.01em;
+  }
+  .v-content { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+  /* ============================================================
+     PRIMITIVES — only tokens, no new colors / sizes.
+     ============================================================ */
+
+  /* --- Button -------------------------------------------------- */
+  .btn {
+    --btn-h: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: var(--btn-h);
+    padding: 0 14px;
+    border-radius: 6px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    border: 1px solid transparent;
+    cursor: pointer;
+    line-height: 1;
+    transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+    outline: none;
+  }
+  .btn:focus-visible {
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+    border-color: var(--color-accent);
+  }
+  .btn--primary {
+    background: var(--color-accent);
+    color: var(--color-accent-fg);
+  }
+  .btn--primary:hover { background: var(--color-accent-hover); }
+  .btn--secondary {
+    background: var(--color-surface);
+    color: var(--color-fg);
+    border-color: var(--color-border-strong);
+  }
+  .btn--secondary:hover { background: var(--color-subtle); }
+  .btn--ghost {
+    background: transparent;
+    color: var(--color-fg-muted);
+  }
+  .btn--ghost:hover { background: var(--color-subtle); color: var(--color-fg); }
+  .btn[disabled],
+  .btn[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn--sm { --btn-h: 28px; padding: 0 10px; font-size: 13px; }
+  .btn--lg { --btn-h: 44px; padding: 0 18px; font-size: 15px; }
+
+  /* tiny inline indicator for "Drafting…" buttons */
+  .dot-pulse {
+    width: 6px; height: 6px;
+    background: currentColor;
+    border-radius: 999px;
+    margin-right: 8px;
+    animation: dot 1.2s ease-in-out infinite;
+    opacity: 0.7;
+  }
+  @keyframes dot {
+    0%, 100% { opacity: 0.25; }
+    50%      { opacity: 0.95; }
+  }
+
+  /* --- Input --------------------------------------------------- */
+  .input,
+  .select,
+  .textarea {
+    display: block;
+    width: 100%;
+    background: var(--color-surface);
+    color: var(--color-fg);
+    border: 1px solid var(--color-border-strong);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color .12s ease, box-shadow .12s ease;
+  }
+  .input::placeholder,
+  .textarea::placeholder { color: var(--color-fg-faint); }
+  .input:hover,
+  .select:hover,
+  .textarea:hover { border-color: var(--color-fg-faint); }
+  .input:focus,
+  .select:focus,
+  .textarea:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+  }
+  .input[aria-invalid="true"],
+  .textarea[aria-invalid="true"] {
+    border-color: var(--color-danger);
+  }
+  .input[aria-invalid="true"]:focus,
+  .textarea[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px var(--color-danger-soft);
+  }
+  .input[disabled],
+  .textarea[disabled],
+  .select[disabled] {
+    background: var(--color-subtle);
+    color: var(--color-fg-faint);
+    cursor: not-allowed;
+  }
+  .select {
+    appearance: none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--color-fg-muted) 50%),
+      linear-gradient(135deg, var(--color-fg-muted) 50%, transparent 50%);
+    background-position: calc(100% - 16px) 50%, calc(100% - 12px) 50%;
+    background-size: 4px 4px, 4px 4px;
+    background-repeat: no-repeat;
+    padding-right: 32px;
+  }
+  .textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.55;
+  }
+  .textarea--mono {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  /* --- Label --------------------------------------------------- */
+  .label {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-fg);
+    margin-bottom: 6px;
+    letter-spacing: -0.003em;
+  }
+  .label .hint {
+    font-weight: 400;
+    color: var(--color-fg-faint);
+    margin-left: 8px;
+    font-size: 12px;
+  }
+
+  /* --- Card ---------------------------------------------------- */
+  .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 20px 22px;
+  }
+  .card--interactive { cursor: pointer; transition: border-color .12s ease, background-color .12s ease; }
+  .card--interactive:hover {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface);
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--color-fg);
+    margin: 0 0 4px;
+    letter-spacing: -0.005em;
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--color-fg-muted);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* --- Headers ------------------------------------------------- */
+  .page-header {
+    font-family: var(--font-sans);
+    font-size: 28px;
+    line-height: 36px;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    color: var(--color-fg);
+    margin: 0;
+  }
+  .section-header {
+    font-family: var(--font-sans);
+    font-size: 18px;
+    line-height: 28px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    color: var(--color-fg);
+    margin: 0;
+  }
+  .header-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-fg-faint);
+    margin: 0 0 6px;
+  }
+
+  /* --- Status badge -------------------------------------------- */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 4px;
+    background: var(--color-subtle);
+    border: 1px solid var(--color-border);
+    color: var(--color-fg-muted);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: -0.002em;
+    line-height: 1;
+  }
+  .badge::before {
+    content: "";
+    width: 6px; height: 6px;
+    border-radius: 999px;
+    background: var(--color-fg-faint);
+  }
+  .badge--success { color: var(--color-fg); background: var(--color-success-soft); border-color: color-mix(in oklch, var(--color-success) 30%, var(--color-border)); }
+  .badge--success::before { background: var(--color-success); }
+  .badge--danger  { color: var(--color-fg); background: var(--color-danger-soft);  border-color: color-mix(in oklch, var(--color-danger) 30%, var(--color-border));  }
+  .badge--danger::before  { background: var(--color-danger); }
+  .badge--accent  { color: var(--color-fg); background: var(--color-accent-soft);  border-color: color-mix(in oklch, var(--color-accent) 30%, var(--color-border));  }
+  .badge--accent::before  { background: var(--color-accent); }
+
+  /* --- Output block (streamed response container) -------------- */
+  .output {
+    background: var(--color-sunken);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 20px 24px 22px;
+    position: relative;
+  }
+  .output-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .output-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-fg-faint);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .output-meta.is-live::before {
+    content: "";
+    width: 7px; height: 7px;
+    border-radius: 999px;
+    background: var(--color-accent);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  .output-meta.is-done::before {
+    content: "";
+    width: 7px; height: 7px;
+    border-radius: 999px;
+    background: var(--color-fg-faint);
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; transform: scale(0.9); }
+    50%      { opacity: 1;   transform: scale(1.15); }
+  }
+  .output-body {
+    font-size: 15px;
+    line-height: 24px;
+    color: var(--color-fg);
+  }
+  .output-body p { margin: 0 0 12px; }
+  .output-body p:last-child { margin-bottom: 0; }
+  .caret {
+    display: inline-block;
+    width: 7px;
+    height: 1em;
+    vertical-align: -2px;
+    background: var(--color-accent);
+    margin-left: 2px;
+    animation: blink 1s steps(2, end) infinite;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* --- Post block (rendered <post> tag) ------------------------ */
+  .post {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 8px 0;
+    font-family: var(--font-serif);
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--color-fg);
+  }
+  .post-meta {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-fg-faint);
+    margin-bottom: 10px;
+  }
+  .post p { margin: 0 0 10px; }
+  .post p:last-child { margin-bottom: 0; }
+
+  /* --- Foot ---------------------------------------------------- */
+  .foot {
+    background: oklch(0.96 0.005 65);
+    padding: 24px 56px 40px;
+    color: oklch(0.45 0.012 55);
+    font-size: 12px;
+    border-top: 1px solid oklch(0.85 0.008 60);
+    font-family: var(--font-sans);
+  }
+  .foot code { font-family: var(--font-mono); }
+  .foot strong { color: oklch(0.22 0.012 55); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<header class="doc-head">
+  <p class="eyebrow">Deliverable 02 · Primitives</p>
+  <h1>The component library.</h1>
+  <p>
+    Ten primitives, every variant. Both modes side by side, drawing only on the tokens defined in deliverable 01. No new colors, no new font sizes, no new radii.
+  </p>
+</header>
+
+<!-- ============================================================
+     1. BUTTON
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">01 <strong>Button</strong></p>
+    <p class="rationale">Three variants: primary (terracotta, single per view), secondary (hairline border on surface), ghost (no chrome until hover). Sizes scale by height; radius stays geometric. Focus is a 3px soft-accent ring, never a glow.</p>
+    <p class="api">.btn / .btn--primary / .btn--secondary / .btn--ghost / .btn--sm / .btn--lg</p>
+  </div>
+
+  <div class="prim-body">
+
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <div class="variant-grid">
+        <div class="variant">
+          <span class="v-label">primary</span>
+          <div class="v-content">
+            <button class="btn btn--primary" type="button">Draft a post</button>
+            <button class="btn btn--primary" type="button"><span class="dot-pulse"></span>Drafting</button>
+            <button class="btn btn--primary" type="button" disabled>Draft a post</button>
+          </div>
+        </div>
+        <div class="variant">
+          <span class="v-label">secondary</span>
+          <div class="v-content">
+            <button class="btn btn--secondary" type="button">Cancel</button>
+            <button class="btn btn--secondary" type="button">Save changes</button>
+            <button class="btn btn--secondary" type="button" disabled>Cancel</button>
+          </div>
+        </div>
+        <div class="variant">
+          <span class="v-label">ghost</span>
+          <div class="v-content">
+            <button class="btn btn--ghost" type="button">Skip this step</button>
+            <button class="btn btn--ghost" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="variant">
+          <span class="v-label">sizes</span>
+          <div class="v-content">
+            <button class="btn btn--primary btn--sm" type="button">Save</button>
+            <button class="btn btn--primary" type="button">Save</button>
+            <button class="btn btn--primary btn--lg" type="button">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <div class="variant-grid">
+        <div class="variant">
+          <span class="v-label">primary</span>
+          <div class="v-content">
+            <button class="btn btn--primary" type="button">Draft a post</button>
+            <button class="btn btn--primary" type="button"><span class="dot-pulse"></span>Drafting</button>
+            <button class="btn btn--primary" type="button" disabled>Draft a post</button>
+          </div>
+        </div>
+        <div class="variant">
+          <span class="v-label">secondary</span>
+          <div class="v-content">
+            <button class="btn btn--secondary" type="button">Cancel</button>
+            <button class="btn btn--secondary" type="button">Save changes</button>
+            <button class="btn btn--secondary" type="button" disabled>Cancel</button>
+          </div>
+        </div>
+        <div class="variant">
+          <span class="v-label">ghost</span>
+          <div class="v-content">
+            <button class="btn btn--ghost" type="button">Skip this step</button>
+            <button class="btn btn--ghost" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="variant">
+          <span class="v-label">sizes</span>
+          <div class="v-content">
+            <button class="btn btn--primary btn--sm" type="button">Save</button>
+            <button class="btn btn--primary" type="button">Save</button>
+            <button class="btn btn--primary btn--lg" type="button">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     2. INPUT
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">02 <strong>Input</strong></p>
+    <p class="rationale">Text, password, select. Default border is border-strong so the field reads as input without a label, hover lifts to fg-faint, focus is accent with the soft ring. Invalid uses danger; never red 500. Disabled fills with subtle.</p>
+    <p class="api">.input / .select · :hover, :focus, [aria-invalid], [disabled]</p>
+  </div>
+
+  <div class="prim-body">
+
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <div class="variant-grid">
+        <div class="variant-stack">
+          <span class="v-label">text</span>
+          <div class="v-content" style="flex-direction: column; align-items: stretch; gap: 10px; width: 100%;">
+            <input class="input" type="text" placeholder="A topic, in a sentence or two" />
+            <input class="input" type="text" value="Why we stopped writing weekly status reports" />
+            <input class="input" type="text" aria-invalid="true" value="sk_… (key not recognized)" />
+            <input class="input" type="text" placeholder="Disabled" disabled />
+          </div>
+        </div>
+        <div class="variant-stack">
+          <span class="v-label">password</span>
+          <div class="v-content" style="width: 100%;">
+            <input class="input" type="password" value="hunter2hunter2hunter" />
+          </div>
+        </div>
+        <div class="variant-stack">
+          <span class="v-label">select</span>
+          <div class="v-content" style="width: 100%;">
+            <select class="select">
+              <option>Anthropic — claude-sonnet-4-5</option>
+              <option>Anthropic — claude-haiku-4-5</option>
+              <option>OpenAI — gpt-5</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <div class="variant-grid">
+        <div class="variant-stack">
+          <span class="v-label">text</span>
+          <div class="v-content" style="flex-direction: column; align-items: stretch; gap: 10px; width: 100%;">
+            <input class="input" type="text" placeholder="A topic, in a sentence or two" />
+            <input class="input" type="text" value="Why we stopped writing weekly status reports" />
+            <input class="input" type="text" aria-invalid="true" value="sk_… (key not recognized)" />
+            <input class="input" type="text" placeholder="Disabled" disabled />
+          </div>
+        </div>
+        <div class="variant-stack">
+          <span class="v-label">password</span>
+          <div class="v-content" style="width: 100%;">
+            <input class="input" type="password" value="hunter2hunter2hunter" />
+          </div>
+        </div>
+        <div class="variant-stack">
+          <span class="v-label">select</span>
+          <div class="v-content" style="width: 100%;">
+            <select class="select">
+              <option>Anthropic — claude-sonnet-4-5</option>
+              <option>Anthropic — claude-haiku-4-5</option>
+              <option>OpenAI — gpt-5</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     3. TEXTAREA
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">03 <strong>Textarea</strong></p>
+    <p class="rationale">Two flavors: prose (Inter, 15/24) for drafts and quality-check pastes, and mono (JetBrains Mono, 13/21) for the voice profile markdown and JSON corpus. Mono variant communicates "this is structured data" without a code editor's worth of chrome.</p>
+    <p class="api">.textarea / .textarea--mono</p>
+  </div>
+
+  <div class="prim-body">
+
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <div class="variant-grid">
+        <div class="variant-stack">
+          <span class="v-label">prose</span>
+          <div class="v-content" style="width: 100%;">
+            <textarea class="textarea" placeholder="Paste a draft to check for AI tells, generic openings, and other things you'd edit out before posting.">Last week a portfolio CEO asked me how we decide what to ship. The honest answer is that we don't decide. We notice what is already moving and clear the path. Three things I keep returning to.</textarea>
+          </div>
+        </div>
+        <div class="variant-stack">
+          <span class="v-label">mono</span>
+          <div class="v-content" style="width: 100%;">
+            <textarea class="textarea textarea--mono">{
+  "posts": [
+    { "id": "act_021", "text": "When I left Google in 2019…" },
+    { "id": "act_044", "text": "Three things I tell every first-time founder…" }
+  ]
+}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <div class="variant-grid">
+        <div class="variant-stack">
+          <span class="v-label">prose</span>
+          <div class="v-content" style="width: 100%;">
+            <textarea class="textarea" placeholder="Paste a draft to check for AI tells, generic openings, and other things you'd edit out before posting.">Last week a portfolio CEO asked me how we decide what to ship. The honest answer is that we don't decide. We notice what is already moving and clear the path. Three things I keep returning to.</textarea>
+          </div>
+        </div>
+        <div class="variant-stack">
+          <span class="v-label">mono</span>
+          <div class="v-content" style="width: 100%;">
+            <textarea class="textarea textarea--mono">{
+  "posts": [
+    { "id": "act_021", "text": "When I left Google in 2019…" },
+    { "id": "act_044", "text": "Three things I tell every first-time founder…" }
+  ]
+}</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     4. LABEL
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">04 <strong>Label</strong></p>
+    <p class="rationale">13/20 medium on fg. Optional hint sits inline at 12 on fg-faint — used for word count, format hint, optional flag. Never wraps; if you need long help text, put it under the field, not in the label.</p>
+    <p class="api">.label · .label .hint</p>
+  </div>
+
+  <div class="prim-body">
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <div class="variant-grid">
+        <div>
+          <label class="label" for="x1">Topic</label>
+          <input class="input" id="x1" type="text" placeholder="A sentence or two" />
+        </div>
+        <div>
+          <label class="label" for="x2">Voice profile <span class="hint">markdown · optional</span></label>
+          <input class="input" id="x2" type="text" placeholder="Paste a voice profile" />
+        </div>
+      </div>
+    </div>
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <div class="variant-grid">
+        <div>
+          <label class="label" for="x3">Topic</label>
+          <input class="input" id="x3" type="text" placeholder="A sentence or two" />
+        </div>
+        <div>
+          <label class="label" for="x4">Voice profile <span class="hint">markdown · optional</span></label>
+          <input class="input" id="x4" type="text" placeholder="Paste a voice profile" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     5. HEADERS
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">05 <strong>Headers</strong></p>
+    <p class="rationale">Page header (h1, 28/36) opens a screen. Section header (h2, 18/28) marks a region inside a screen. An optional mono eyebrow gives context without taking visual weight. Page headers never repeat in the same view.</p>
+    <p class="api">.page-header / .section-header / .header-eyebrow</p>
+  </div>
+
+  <div class="prim-body">
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <div style="margin-bottom: 32px;">
+        <p class="header-eyebrow">Workspace</p>
+        <h1 class="page-header">What are you writing today?</h1>
+      </div>
+      <h2 class="section-header">Provider and API key</h2>
+      <p style="margin: 4px 0 0; color: var(--color-fg-muted); font-size: 14px;">Bring your own. Stored encrypted in your Vercel project.</p>
+    </div>
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <div style="margin-bottom: 32px;">
+        <p class="header-eyebrow">Workspace</p>
+        <h1 class="page-header">What are you writing today?</h1>
+      </div>
+      <h2 class="section-header">Provider and API key</h2>
+      <p style="margin: 4px 0 0; color: var(--color-fg-muted); font-size: 14px;">Bring your own. Stored encrypted in your Vercel project.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     6. CARD
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">06 <strong>Card</strong></p>
+    <p class="rationale">Surface fill on the bg, hairline border, 8px radius. The interactive variant lifts its border to border-strong on hover, never tilts or grows a shadow. Cards are the workspace's main unit.</p>
+    <p class="api">.card / .card--interactive · .card-title / .card-desc</p>
+  </div>
+
+  <div class="prim-body">
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="card">
+          <h3 class="card-title">Draft a post</h3>
+          <p class="card-desc">Topic in, draft out, in your voice.</p>
+        </div>
+        <div class="card card--interactive">
+          <h3 class="card-title">Quality check</h3>
+          <p class="card-desc">Catch AI tells before you post.</p>
+        </div>
+      </div>
+    </div>
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="card">
+          <h3 class="card-title">Draft a post</h3>
+          <p class="card-desc">Topic in, draft out, in your voice.</p>
+        </div>
+        <div class="card card--interactive">
+          <h3 class="card-title">Quality check</h3>
+          <p class="card-desc">Catch AI tells before you post.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     7. STATUS BADGE
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">07 <strong>Status badge</strong></p>
+    <p class="rationale">A compact pill for state of being. Neutral by default; success / danger / accent variants carry softened semantic fills. Always paired with a 6px colored dot so it reads at a glance without depending on color alone.</p>
+    <p class="api">.badge / .badge--success / .badge--danger / .badge--accent</p>
+  </div>
+
+  <div class="prim-body">
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <div class="v-content" style="gap: 10px;">
+        <span class="badge">12 posts loaded</span>
+        <span class="badge badge--success">Voice profile active</span>
+        <span class="badge badge--accent">Streaming</span>
+        <span class="badge badge--danger">API key invalid</span>
+      </div>
+    </div>
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <div class="v-content" style="gap: 10px;">
+        <span class="badge">12 posts loaded</span>
+        <span class="badge badge--success">Voice profile active</span>
+        <span class="badge badge--accent">Streaming</span>
+        <span class="badge badge--danger">API key invalid</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     8. OUTPUT BLOCK
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">08 <strong>Output block</strong></p>
+    <p class="rationale">Where streamed text lands. Sunken surface and a hairline border so the eye knows the model wrote this, not the user. A pulsing accent dot when live; a faint dot when complete. No skeleton loader theater, no jumbo spinner. The caret is a single terracotta block.</p>
+    <p class="api">.output · .output-meta.is-live / .is-done</p>
+  </div>
+
+  <div class="prim-body">
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <div class="output" style="margin-bottom: 16px;">
+        <div class="output-head">
+          <span class="output-meta is-live">Drafting</span>
+          <button class="btn btn--ghost btn--sm" type="button">Stop</button>
+        </div>
+        <div class="output-body">
+          <p>Three things I keep returning to when a portfolio CEO asks how we decide what to ship. First, the team is already telling you what wants to move. Your job is to clear the path, not to pick the winner<span class="caret"></span></p>
+        </div>
+      </div>
+      <div class="output">
+        <div class="output-head">
+          <span class="output-meta is-done">Complete · 312 tokens</span>
+          <button class="btn btn--ghost btn--sm" type="button">Copy</button>
+        </div>
+        <div class="output-body">
+          <p>Three things I keep returning to when a portfolio CEO asks how we decide what to ship.</p>
+          <p>First, the team is already telling you what wants to move. Your job is to clear the path, not to pick the winner.</p>
+        </div>
+      </div>
+    </div>
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <div class="output" style="margin-bottom: 16px;">
+        <div class="output-head">
+          <span class="output-meta is-live">Drafting</span>
+          <button class="btn btn--ghost btn--sm" type="button">Stop</button>
+        </div>
+        <div class="output-body">
+          <p>Three things I keep returning to when a portfolio CEO asks how we decide what to ship. First, the team is already telling you what wants to move. Your job is to clear the path, not to pick the winner<span class="caret"></span></p>
+        </div>
+      </div>
+      <div class="output">
+        <div class="output-head">
+          <span class="output-meta is-done">Complete · 312 tokens</span>
+          <button class="btn btn--ghost btn--sm" type="button">Copy</button>
+        </div>
+        <div class="output-body">
+          <p>Three things I keep returning to when a portfolio CEO asks how we decide what to ship.</p>
+          <p>First, the team is already telling you what wants to move. Your job is to clear the path, not to pick the winner.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     9. POST BLOCK
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">09 <strong>Post block</strong></p>
+    <p class="rationale">The one editorial moment per screen. When the model returns a draft wrapped in &lt;post&gt; tags, it renders as Source Serif on surface, set off by a 3px terracotta left rule. The serif signals "this is the artifact you'd publish," not chat output.</p>
+    <p class="api">.post / .post-meta</p>
+  </div>
+
+  <div class="prim-body">
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <article class="post">
+        <span class="post-meta">Draft · 184 words</span>
+        <p>Last week a portfolio CEO asked me how we decide what to ship. I gave the answer I always give, and watched it not land.</p>
+        <p>The honest version is that we don't decide. We notice what is already moving and we clear the path.</p>
+        <p>Three things I keep returning to when I'm trying to teach this:</p>
+        <p>One. The team is already telling you what wants to move. Your job isn't to pick the winner. It's to hear which thing keeps coming up in the standups, the side-channel DMs, the offhand comments in product review. That's the candidate.</p>
+      </article>
+    </div>
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <article class="post">
+        <span class="post-meta">Draft · 184 words</span>
+        <p>Last week a portfolio CEO asked me how we decide what to ship. I gave the answer I always give, and watched it not land.</p>
+        <p>The honest version is that we don't decide. We notice what is already moving and we clear the path.</p>
+        <p>Three things I keep returning to when I'm trying to teach this:</p>
+        <p>One. The team is already telling you what wants to move. Your job isn't to pick the winner. It's to hear which thing keeps coming up in the standups, the side-channel DMs, the offhand comments in product review. That's the candidate.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     10. COMPOSED ROW — context check
+     ============================================================ -->
+<section class="primitive">
+  <div class="prim-head">
+    <p class="num">10 <strong>Composed</strong></p>
+    <p class="rationale">A check that the primitives sit together without conflict: page header, badges, action card, input + button. If anything in this row feels noisy, the primitive is wrong, not the composition.</p>
+    <p class="api">in‑situ check</p>
+  </div>
+
+  <div class="prim-body">
+
+    <div class="pane" data-mode="light">
+      <p class="pane-label">Light</p>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+        <p class="header-eyebrow" style="margin: 0;">Workspace</p>
+        <div style="display: flex; gap: 8px;">
+          <span class="badge">12 posts loaded</span>
+          <span class="badge badge--success">Voice profile active</span>
+        </div>
+      </div>
+      <h1 class="page-header" style="margin-bottom: 20px;">What are you writing today?</h1>
+      <div class="card" style="margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px;">
+          <h3 class="card-title">Draft a post</h3>
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--color-fg-faint);">⌘1</span>
+        </div>
+        <label class="label" for="cmp1">Topic</label>
+        <textarea class="textarea" id="cmp1" style="min-height: 72px;" placeholder="A sentence or two — what's the post about?"></textarea>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+          <button class="btn btn--ghost" type="button">Clear</button>
+          <button class="btn btn--primary" type="button">Draft</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane" data-mode="dark">
+      <p class="pane-label">Dark</p>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+        <p class="header-eyebrow" style="margin: 0;">Workspace</p>
+        <div style="display: flex; gap: 8px;">
+          <span class="badge">12 posts loaded</span>
+          <span class="badge badge--success">Voice profile active</span>
+        </div>
+      </div>
+      <h1 class="page-header" style="margin-bottom: 20px;">What are you writing today?</h1>
+      <div class="card" style="margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px;">
+          <h3 class="card-title">Draft a post</h3>
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--color-fg-faint);">⌘1</span>
+        </div>
+        <label class="label" for="cmp2">Topic</label>
+        <textarea class="textarea" id="cmp2" style="min-height: 72px;" placeholder="A sentence or two — what's the post about?"></textarea>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+          <button class="btn btn--ghost" type="button">Clear</button>
+          <button class="btn btn--primary" type="button">Draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<footer class="foot">
+  <strong>Source of truth:</strong> tokens.css. Every value here resolves to a CSS custom property from the <code>@theme</code> block. If a screen needs a value not defined there, the token is missing — add it before adding the screen.
+</footer>
+
+</body>
+</html>

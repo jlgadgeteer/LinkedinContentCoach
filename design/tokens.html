@@ -1,0 +1,687 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Tokens — LinkedIn Content Coach</title>
+<meta name="viewport" content="width=1440" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+<style>
+  /* ---------- Shared tokens (single source of truth for the preview) ----- */
+  :root {
+    --color-bg:            oklch(0.985 0.005 70);
+    --color-surface:       oklch(0.995 0.003 70);
+    --color-subtle:        oklch(0.960 0.006 65);
+    --color-sunken:        oklch(0.940 0.007 65);
+    --color-border:        oklch(0.900 0.008 65);
+    --color-border-strong: oklch(0.800 0.010 60);
+    --color-fg:            oklch(0.220 0.012 55);
+    --color-fg-muted:      oklch(0.480 0.012 60);
+    --color-fg-faint:      oklch(0.620 0.012 60);
+    --color-accent:        oklch(0.530 0.130 35);
+    --color-accent-hover:  oklch(0.470 0.140 33);
+    --color-accent-soft:   oklch(0.950 0.025 40);
+    --color-accent-fg:     oklch(0.985 0.005 70);
+    --color-danger:        oklch(0.480 0.120 25);
+    --color-danger-soft:   oklch(0.955 0.020 25);
+    --color-success:       oklch(0.500 0.080 145);
+    --color-success-soft:  oklch(0.960 0.020 145);
+
+    --font-sans:  "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, sans-serif;
+    --font-serif: "Source Serif 4", "Iowan Old Style", "Charter", Georgia, serif;
+    --font-mono:  "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  [data-mode="dark"] {
+    --color-bg:            oklch(0.185 0.008 55);
+    --color-surface:       oklch(0.220 0.008 55);
+    --color-subtle:        oklch(0.255 0.009 55);
+    --color-sunken:        oklch(0.165 0.008 55);
+    --color-border:        oklch(0.310 0.010 55);
+    --color-border-strong: oklch(0.400 0.012 55);
+    --color-fg:            oklch(0.940 0.008 70);
+    --color-fg-muted:      oklch(0.720 0.010 65);
+    --color-fg-faint:      oklch(0.550 0.012 60);
+    --color-accent:        oklch(0.720 0.130 38);
+    --color-accent-hover:  oklch(0.780 0.130 38);
+    --color-accent-soft:   oklch(0.290 0.045 38);
+    --color-accent-fg:     oklch(0.165 0.008 55);
+    --color-danger:        oklch(0.700 0.130 28);
+    --color-danger-soft:   oklch(0.300 0.045 28);
+    --color-success:       oklch(0.720 0.090 145);
+    --color-success-soft:  oklch(0.280 0.030 145);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: oklch(0.92 0.005 65); }
+  body {
+    font-family: var(--font-sans);
+    color: oklch(0.3 0.01 55);
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- Page shell -------------------------------------------------- */
+  .header {
+    padding: 40px 56px 24px;
+    border-bottom: 1px solid oklch(0.85 0.008 60);
+    background: oklch(0.96 0.005 65);
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: oklch(0.5 0.012 55);
+    margin: 0 0 10px;
+  }
+  .title {
+    font-family: var(--font-serif);
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    margin: 0;
+    color: oklch(0.22 0.012 55);
+  }
+  .subtitle {
+    margin: 8px 0 0;
+    max-width: 720px;
+    color: oklch(0.45 0.012 55);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid oklch(0.85 0.008 60);
+  }
+  .mode {
+    background: var(--color-bg);
+    color: var(--color-fg);
+    padding: 40px 56px 56px;
+    min-height: 100%;
+    font-family: var(--font-sans);
+  }
+  .mode + .mode { border-left: 1px solid oklch(0.85 0.008 60); }
+  [data-mode="dark"].mode + .mode,
+  .mode[data-mode="light"] + [data-mode="dark"] { border-left-color: oklch(0.35 0.01 55); }
+
+  .mode-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-fg-muted);
+    margin: 0 0 28px;
+  }
+  .mode-label::before {
+    content: "";
+    width: 10px; height: 10px;
+    border-radius: 999px;
+    background: var(--color-fg);
+  }
+  [data-mode="dark"] .mode-label::before { background: var(--color-accent); }
+
+  /* ---------- Section blocks --------------------------------------------- */
+  section + section { margin-top: 44px; }
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .sec-head h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--color-fg);
+  }
+  .sec-head .meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-fg-faint);
+  }
+
+  /* ---------- Swatch grid ------------------------------------------------ */
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .swatch {
+    background: var(--color-surface);
+    padding: 14px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 96px;
+  }
+  .swatch .chip {
+    height: 38px;
+    border-radius: 4px;
+    border: 1px solid var(--color-border);
+    margin-bottom: 8px;
+  }
+  .swatch .name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-fg);
+  }
+  .swatch .val {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--color-fg-faint);
+    letter-spacing: -0.01em;
+  }
+
+  /* Inline swatches row (smaller, for fg) */
+  .text-swatches {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .text-swatch {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 16px 16px 18px;
+    background: var(--color-surface);
+  }
+  .text-swatch .demo {
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 12px;
+  }
+  .text-swatch .name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-fg);
+  }
+  .text-swatch .val {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--color-fg-faint);
+    margin-top: 2px;
+  }
+
+  /* ---------- Accent row ------------------------------------------------- */
+  .accent-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 12px;
+  }
+  .accent-card {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    padding: 18px;
+  }
+  .accent-card .label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-fg-faint);
+    margin-bottom: 12px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    border: 1px solid transparent;
+    cursor: pointer;
+    line-height: 1;
+  }
+  .btn-primary { background: var(--color-accent); color: var(--color-accent-fg); }
+  .btn-primary:hover { background: var(--color-accent-hover); }
+  .btn-secondary {
+    background: var(--color-surface);
+    color: var(--color-fg);
+    border-color: var(--color-border-strong);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-fg-muted);
+  }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .input-demo {
+    width: 100%;
+    background: var(--color-surface);
+    color: var(--color-fg);
+    border: 1px solid var(--color-border-strong);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    outline: none;
+  }
+  .input-demo:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-soft);
+  }
+
+  /* ---------- Type scale ------------------------------------------------- */
+  .type-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 120px;
+    gap: 20px;
+    align-items: baseline;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .type-row:last-child { border-bottom: 0; }
+  .type-row .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-fg-faint);
+    letter-spacing: 0.02em;
+  }
+  .type-row .specimen { color: var(--color-fg); letter-spacing: -0.011em; }
+  .type-row .specs {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--color-fg-faint);
+    text-align: right;
+  }
+
+  .ts-xs    { font-size: 12px;  line-height: 16px; }
+  .ts-sm    { font-size: 13px;  line-height: 20px; }
+  .ts-base  { font-size: 15px;  line-height: 24px; }
+  .ts-md    { font-size: 16px;  line-height: 26px; }
+  .ts-lg    { font-size: 18px;  line-height: 28px; font-weight: 500; }
+  .ts-xl    { font-size: 22px;  line-height: 30px; font-weight: 500; letter-spacing: -0.013em; }
+  .ts-2xl   { font-size: 28px;  line-height: 36px; font-weight: 500; letter-spacing: -0.015em; }
+  .ts-3xl   { font-size: 36px;  line-height: 44px; font-weight: 500; letter-spacing: -0.018em; }
+
+  .family-card {
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    background: var(--color-surface);
+  }
+  .family-card + .family-card { margin-top: 10px; }
+  .family-card .meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .family-card .meta .name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-fg-faint);
+  }
+  .family-card .meta .label {
+    font-size: 12px;
+    color: var(--color-fg-muted);
+  }
+  .specimen-sans  { font-family: var(--font-sans);  font-size: 22px; letter-spacing: -0.013em; color: var(--color-fg); }
+  .specimen-serif { font-family: var(--font-serif); font-size: 22px; color: var(--color-fg); font-weight: 400; }
+  .specimen-mono  { font-family: var(--font-mono);  font-size: 16px; color: var(--color-fg); }
+
+  /* ---------- State row -------------------------------------------------- */
+  .state-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .state-card {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .state-card .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-fg-faint);
+  }
+  .state-card .pill::before {
+    content: "";
+    width: 8px; height: 8px;
+    border-radius: 999px;
+  }
+  .state-danger  .pill::before { background: var(--color-danger); }
+  .state-success .pill::before { background: var(--color-success); }
+  .state-card p { margin: 6px 0 0; font-size: 13px; color: var(--color-fg); }
+
+  /* ---------- Footer ----------------------------------------------------- */
+  .foot {
+    background: oklch(0.96 0.005 65);
+    padding: 24px 56px 40px;
+    color: oklch(0.45 0.012 55);
+    font-size: 12px;
+    border-top: 1px solid oklch(0.85 0.008 60);
+  }
+  .foot strong { color: oklch(0.22 0.012 55); font-weight: 500; }
+</style>
+</head>
+<body>
+
+  <header class="header">
+    <p class="eyebrow">Deliverable 01 · Tokens</p>
+    <h1 class="title">Warm paper, terracotta, one editorial serif.</h1>
+    <p class="subtitle">
+      Colors are oklch with chroma capped at 0.012 on neutrals so the warmth reads as paper, not as a color. Dark mode is a deep warm slate with the same hue, never flat black. A single accent — terracotta — carries primary CTAs and focus rings. Type pairs Inter for UI with Source Serif 4 for the one editorial moment per screen (rendered post blocks).
+    </p>
+  </header>
+
+  <div class="split">
+
+    <!-- ====================== LIGHT MODE ====================== -->
+    <div class="mode" data-mode="light">
+      <p class="mode-label">Light</p>
+
+      <section>
+        <div class="sec-head"><h3>Surfaces &amp; borders</h3><span class="meta">5 tokens</span></div>
+        <div class="swatches">
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-bg);"></div>
+            <span class="name">bg</span>
+            <span class="val">oklch(.985 .005 70)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-surface);"></div>
+            <span class="name">surface</span>
+            <span class="val">oklch(.995 .003 70)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-subtle);"></div>
+            <span class="name">subtle</span>
+            <span class="val">oklch(.960 .006 65)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-sunken);"></div>
+            <span class="name">sunken</span>
+            <span class="val">oklch(.940 .007 65)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-border); border-color: transparent;"></div>
+            <span class="name">border</span>
+            <span class="val">oklch(.900 .008 65)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-border-strong); border-color: transparent;"></div>
+            <span class="name">border‑strong</span>
+            <span class="val">oklch(.800 .010 60)</span>
+          </div>
+          <div class="swatch" style="grid-column: span 2; display: flex; flex-direction: column; justify-content: center;">
+            <span class="val" style="font-size: 11px;">Both border tokens against bg.</span>
+            <span class="name" style="font-weight:400; color: var(--color-fg-muted); margin-top: 6px;">Hairlines define cards and inputs. Strong border only on focused inputs and dividers between sections.</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>Foreground</h3><span class="meta">3 tokens</span></div>
+        <div class="text-swatches">
+          <div class="text-swatch">
+            <div class="demo" style="color: var(--color-fg);">A senior CTO scans the repo.</div>
+            <div class="name">fg</div>
+            <div class="val">oklch(.220 .012 55)</div>
+          </div>
+          <div class="text-swatch">
+            <div class="demo" style="color: var(--color-fg-muted);">12 posts loaded · voice profile active</div>
+            <div class="name">fg‑muted</div>
+            <div class="val">oklch(.480 .012 60)</div>
+          </div>
+          <div class="text-swatch">
+            <div class="demo" style="color: var(--color-fg-faint);">Paste a draft to quality check</div>
+            <div class="name">fg‑faint</div>
+            <div class="val">oklch(.620 .012 60)</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>Accent · terracotta</h3><span class="meta">primary CTA, focus</span></div>
+        <div class="accent-row">
+          <div class="accent-card">
+            <div class="label">In use</div>
+            <div class="btn-row">
+              <button class="btn btn-primary" type="button">Draft a post</button>
+              <button class="btn btn-secondary" type="button">Cancel</button>
+              <button class="btn btn-ghost" type="button">Skip</button>
+            </div>
+            <input class="input-demo" style="margin-top: 12px;" value="A focused topic input" />
+          </div>
+          <div class="accent-card">
+            <div class="label">accent</div>
+            <div class="chip" style="background: var(--color-accent); height: 44px; border-radius: 6px; border: none;"></div>
+            <div class="val" style="font-family: var(--font-mono); font-size: 10.5px; color: var(--color-fg-faint); margin-top: 8px;">oklch(.530 .130 35)</div>
+          </div>
+          <div class="accent-card">
+            <div class="label">accent‑soft</div>
+            <div class="chip" style="background: var(--color-accent-soft); height: 44px; border-radius: 6px; border: 1px solid var(--color-border);"></div>
+            <div class="val" style="font-family: var(--font-mono); font-size: 10.5px; color: var(--color-fg-faint); margin-top: 8px;">oklch(.950 .025 40)</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>State</h3><span class="meta">calm, specific</span></div>
+        <div class="state-row">
+          <div class="state-card state-danger" style="background: var(--color-danger-soft); border-color: color-mix(in oklch, var(--color-danger) 30%, var(--color-border));">
+            <span class="pill">danger</span>
+            <p>API key invalid. Settings → Provider to update.</p>
+          </div>
+          <div class="state-card state-success" style="background: var(--color-success-soft); border-color: color-mix(in oklch, var(--color-success) 30%, var(--color-border));">
+            <span class="pill">success</span>
+            <p>Corpus imported. 47 posts indexed.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>Type families</h3><span class="meta">3 families</span></div>
+        <div class="family-card">
+          <div class="meta">
+            <span class="name">Inter</span>
+            <span class="label">UI — every label, button, body</span>
+          </div>
+          <div class="specimen-sans">A considered tool for serious writers.</div>
+        </div>
+        <div class="family-card">
+          <div class="meta">
+            <span class="name">Source Serif 4</span>
+            <span class="label">One editorial moment per screen</span>
+          </div>
+          <div class="specimen-serif">Posts in &lt;post&gt; tags render here.</div>
+        </div>
+        <div class="family-card">
+          <div class="meta">
+            <span class="name">JetBrains Mono</span>
+            <span class="label">Voice profile · JSON corpus · code</span>
+          </div>
+          <div class="specimen-mono">VOICE_PROFILE.md  ·  posts.json  ·  47 KB</div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>Type scale</h3><span class="meta">8 steps</span></div>
+        <div class="type-row"><span class="tag">3xl</span><span class="specimen ts-3xl">Welcome back.</span><span class="specs">36 / 44 · 500</span></div>
+        <div class="type-row"><span class="tag">2xl</span><span class="specimen ts-2xl">Draft a post</span><span class="specs">28 / 36 · 500</span></div>
+        <div class="type-row"><span class="tag">xl</span><span class="specimen ts-xl">Quality check</span><span class="specs">22 / 30 · 500</span></div>
+        <div class="type-row"><span class="tag">lg</span><span class="specimen ts-lg">Provider and API key</span><span class="specs">18 / 28 · 500</span></div>
+        <div class="type-row"><span class="tag">md</span><span class="specimen ts-md">Input text and settings body sit at sixteen pixels.</span><span class="specs">16 / 26 · 400</span></div>
+        <div class="type-row"><span class="tag">base</span><span class="specimen ts-base">Default body. Reads like a journal column, not a marketing page.</span><span class="specs">15 / 24 · 400</span></div>
+        <div class="type-row"><span class="tag">sm</span><span class="specimen ts-sm">Captions, badge labels, dense UI rows live here.</span><span class="specs">13 / 20 · 400</span></div>
+        <div class="type-row"><span class="tag">xs</span><span class="specimen ts-xs">UPPERCASE EYEBROWS · STATUS BADGES · 12 POSTS LOADED</span><span class="specs">12 / 16 · 500</span></div>
+      </section>
+
+    </div>
+
+
+    <!-- ====================== DARK MODE ====================== -->
+    <div class="mode" data-mode="dark">
+      <p class="mode-label">Dark</p>
+
+      <section>
+        <div class="sec-head"><h3>Surfaces &amp; borders</h3><span class="meta">5 tokens</span></div>
+        <div class="swatches">
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-bg);"></div>
+            <span class="name">bg</span>
+            <span class="val">oklch(.185 .008 55)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-surface);"></div>
+            <span class="name">surface</span>
+            <span class="val">oklch(.220 .008 55)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-subtle);"></div>
+            <span class="name">subtle</span>
+            <span class="val">oklch(.255 .009 55)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-sunken);"></div>
+            <span class="name">sunken</span>
+            <span class="val">oklch(.165 .008 55)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-border); border-color: transparent;"></div>
+            <span class="name">border</span>
+            <span class="val">oklch(.310 .010 55)</span>
+          </div>
+          <div class="swatch">
+            <div class="chip" style="background: var(--color-border-strong); border-color: transparent;"></div>
+            <span class="name">border‑strong</span>
+            <span class="val">oklch(.400 .012 55)</span>
+          </div>
+          <div class="swatch" style="grid-column: span 2; display: flex; flex-direction: column; justify-content: center;">
+            <span class="val" style="font-size: 11px;">Deep warm slate, never flat black.</span>
+            <span class="name" style="font-weight:400; color: var(--color-fg-muted); margin-top: 6px;">Five surface tones span 0.165→0.255, so cards lift gently without shadows doing the work.</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>Foreground</h3><span class="meta">3 tokens</span></div>
+        <div class="text-swatches">
+          <div class="text-swatch">
+            <div class="demo" style="color: var(--color-fg);">A senior CTO scans the repo.</div>
+            <div class="name">fg</div>
+            <div class="val">oklch(.940 .008 70)</div>
+          </div>
+          <div class="text-swatch">
+            <div class="demo" style="color: var(--color-fg-muted);">12 posts loaded · voice profile active</div>
+            <div class="name">fg‑muted</div>
+            <div class="val">oklch(.720 .010 65)</div>
+          </div>
+          <div class="text-swatch">
+            <div class="demo" style="color: var(--color-fg-faint);">Paste a draft to quality check</div>
+            <div class="name">fg‑faint</div>
+            <div class="val">oklch(.550 .012 60)</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>Accent · terracotta</h3><span class="meta">lifted for contrast</span></div>
+        <div class="accent-row">
+          <div class="accent-card">
+            <div class="label">In use</div>
+            <div class="btn-row">
+              <button class="btn btn-primary" type="button">Draft a post</button>
+              <button class="btn btn-secondary" type="button">Cancel</button>
+              <button class="btn btn-ghost" type="button">Skip</button>
+            </div>
+            <input class="input-demo" style="margin-top: 12px;" value="A focused topic input" />
+          </div>
+          <div class="accent-card">
+            <div class="label">accent</div>
+            <div class="chip" style="background: var(--color-accent); height: 44px; border-radius: 6px; border: none;"></div>
+            <div class="val" style="font-family: var(--font-mono); font-size: 10.5px; color: var(--color-fg-faint); margin-top: 8px;">oklch(.720 .130 38)</div>
+          </div>
+          <div class="accent-card">
+            <div class="label">accent‑soft</div>
+            <div class="chip" style="background: var(--color-accent-soft); height: 44px; border-radius: 6px; border: 1px solid var(--color-border);"></div>
+            <div class="val" style="font-family: var(--font-mono); font-size: 10.5px; color: var(--color-fg-faint); margin-top: 8px;">oklch(.290 .045 38)</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>State</h3><span class="meta">calm, specific</span></div>
+        <div class="state-row">
+          <div class="state-card state-danger" style="background: var(--color-danger-soft); border-color: color-mix(in oklch, var(--color-danger) 40%, var(--color-border));">
+            <span class="pill">danger</span>
+            <p>API key invalid. Settings → Provider to update.</p>
+          </div>
+          <div class="state-card state-success" style="background: var(--color-success-soft); border-color: color-mix(in oklch, var(--color-success) 40%, var(--color-border));">
+            <span class="pill">success</span>
+            <p>Corpus imported. 47 posts indexed.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>Type families</h3><span class="meta">3 families</span></div>
+        <div class="family-card">
+          <div class="meta">
+            <span class="name">Inter</span>
+            <span class="label">UI — every label, button, body</span>
+          </div>
+          <div class="specimen-sans">A considered tool for serious writers.</div>
+        </div>
+        <div class="family-card">
+          <div class="meta">
+            <span class="name">Source Serif 4</span>
+            <span class="label">One editorial moment per screen</span>
+          </div>
+          <div class="specimen-serif">Posts in &lt;post&gt; tags render here.</div>
+        </div>
+        <div class="family-card">
+          <div class="meta">
+            <span class="name">JetBrains Mono</span>
+            <span class="label">Voice profile · JSON corpus · code</span>
+          </div>
+          <div class="specimen-mono">VOICE_PROFILE.md  ·  posts.json  ·  47 KB</div>
+        </div>
+      </section>
+
+      <section>
+        <div class="sec-head"><h3>Type scale</h3><span class="meta">8 steps</span></div>
+        <div class="type-row"><span class="tag">3xl</span><span class="specimen ts-3xl">Welcome back.</span><span class="specs">36 / 44 · 500</span></div>
+        <div class="type-row"><span class="tag">2xl</span><span class="specimen ts-2xl">Draft a post</span><span class="specs">28 / 36 · 500</span></div>
+        <div class="type-row"><span class="tag">xl</span><span class="specimen ts-xl">Quality check</span><span class="specs">22 / 30 · 500</span></div>
+        <div class="type-row"><span class="tag">lg</span><span class="specimen ts-lg">Provider and API key</span><span class="specs">18 / 28 · 500</span></div>
+        <div class="type-row"><span class="tag">md</span><span class="specimen ts-md">Input text and settings body sit at sixteen pixels.</span><span class="specs">16 / 26 · 400</span></div>
+        <div class="type-row"><span class="tag">base</span><span class="specimen ts-base">Default body. Reads like a journal column, not a marketing page.</span><span class="specs">15 / 24 · 400</span></div>
+        <div class="type-row"><span class="tag">sm</span><span class="specimen ts-sm">Captions, badge labels, dense UI rows live here.</span><span class="specs">13 / 20 · 400</span></div>
+        <div class="type-row"><span class="tag">xs</span><span class="specimen ts-xs">UPPERCASE EYEBROWS · STATUS BADGES · 12 POSTS LOADED</span><span class="specs">12 / 16 · 500</span></div>
+      </section>
+
+    </div>
+
+  </div>
+
+  <footer class="foot">
+    <strong>Companion CSS:</strong> tokens.css — drop in after <code style="font-family: var(--font-mono);">@import "tailwindcss";</code>. Dark mode auto‑switches via <code style="font-family: var(--font-mono);">prefers-color-scheme</code>; a manual <code style="font-family: var(--font-mono);">[data-theme="dark"]</code> override is included for forced previews.
+  </footer>
+
+</body>
+</html>

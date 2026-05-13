@@ -1,0 +1,91 @@
+// Prompt assembler. Builds the final messages array for the LLM based on the
+// requested action, the user's voice profile, their post corpus, and the input.
+
+import type { Action, Post } from "../types";
+import { DRAFT_SKILL, IDEATE_SKILL, SEARCH_SKILL, CHECK_SKILL } from "./skills";
+
+const SYSTEM_BASE = `You are this creator's LinkedIn content coach. You help them turn ideas into posts that sound like them, not like an LLM. The voice profile and post history below are authoritative.
+
+Core operating rules:
+
+- Never announce tool usage. Don't say "let me search your posts." Just do the work.
+- Direct, peer voice. They are senior. Skip over-explaining and disclaimers. Push back when their thinking is off.
+- The voice profile wins over your defaults. When the user contradicts the voice profile in chat, follow the user.
+- Don't say "as an AI" or apologize for being an LLM.`;
+
+function skillFor(action: Action): string {
+  switch (action) {
+    case "draft":
+      return DRAFT_SKILL;
+    case "ideate":
+      return IDEATE_SKILL;
+    case "search":
+      return SEARCH_SKILL;
+    case "check":
+      return CHECK_SKILL;
+  }
+}
+
+function formatPostCorpus(posts: Post[], limit = 30): string {
+  if (posts.length === 0) {
+    return "(No post history loaded. The creator has not yet imported their LinkedIn posts.)";
+  }
+  // Take the most recent N posts. For larger corpora this should be smarter
+  // (top performers + recent), but for v1 recency is fine.
+  const slice = posts.slice(0, limit);
+  const formatted = slice.map((p, i) => {
+    return `### Post ${i + 1}\n**Date:** ${p.date}\n**Hook:** ${p.hook}\n${p.url ? `**URL:** ${p.url}\n` : ""}\n${p.text}`;
+  });
+  const note = posts.length > limit ? `\n\n(${posts.length - limit} additional older posts available but not shown for brevity.)` : "";
+  return formatted.join("\n\n---\n\n") + note;
+}
+
+export function buildSystemPrompt(args: {
+  action: Action;
+  voiceProfile: string;
+  posts: Post[];
+}): string {
+  const voiceBlock = args.voiceProfile.trim().length > 0
+    ? args.voiceProfile.trim()
+    : "(No voice profile loaded. Use sensible LinkedIn defaults and ask the creator to fill in their voice profile in Settings.)";
+
+  return [
+    SYSTEM_BASE,
+    "",
+    "## Skill: " + args.action,
+    "",
+    skillFor(args.action),
+    "",
+    "## Voice profile",
+    "",
+    voiceBlock,
+    "",
+    "## Post corpus",
+    "",
+    formatPostCorpus(args.posts),
+  ].join("\n");
+}
+
+export function buildUserMessage(args: {
+  action: Action;
+  topic?: string;
+  draft?: string;
+  query?: string;
+}): string {
+  switch (args.action) {
+    case "draft":
+      return args.topic
+        ? `Draft a post about: ${args.topic}`
+        : "Draft a LinkedIn post. The user didn't specify a topic; ask one short clarifying question.";
+    case "ideate":
+      return args.topic
+        ? `Give me 3 to 5 post ideas, with this focus area in mind: ${args.topic}`
+        : "Give me 3 to 5 post ideas for this week, based on my themes and recent posts.";
+    case "search":
+      return args.query
+        ? `Search my past posts for: ${args.query}`
+        : "Show me my most recent posts.";
+    case "check":
+      return `Run a quality check on this draft and return findings with specific fixes:\n\n${args.draft ?? "(no draft provided)"}`;
+  }
+}
