@@ -1,9 +1,19 @@
+import { redirect } from "next/navigation";
+import { getSetupState } from "@/lib/setup";
+
+export const dynamic = "force-dynamic";
+
 /**
  * Workspace home. Replaced in Phase 6 with the designed 2x2 action grid.
- * For now this is a minimal placeholder so the root route resolves while
- * Phases 2 through 5 land.
+ * For now this is a minimal placeholder while the design phases land.
+ * Redirects to /setup if the user hasn't completed first-run setup.
  */
-export default function HomePage() {
+export default async function HomePage() {
+  if (process.env.POSTGRES_URL) {
+    const state = await getSetupState();
+    if (!state.isComplete) redirect("/setup");
+  }
+
   return (
     <div className="content-wide">
       <div

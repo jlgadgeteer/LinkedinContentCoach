@@ -54,18 +54,20 @@ The design output lives in `design/` and is treated as source of truth. The hand
 
 **Acceptance:** unauthenticated requests redirect to `/login`. Wrong password fails with a calm specific error. Correct password lands on `/` and the session cookie persists across reloads. After 5 failures from one IP, return a `429` for 60 seconds.
 
-## Phase 4: Setup wizard
+## Phase 4: Setup wizard ✅
 
 **Goal:** first login lands on a 3-step setup that captures API key, voice profile, and post corpus.
 
-- [ ] Create `app/setup/page.tsx` and supporting components per design Section 2.
-- [ ] Step 1 — Connect a model: provider select + API key password input. On "Test and continue", make a single test request to the provider. If it succeeds, encrypt the key (use `@/lib/crypto.ts` — write a small wrapper around Node's `crypto` AES-GCM with a key derived from `AUTH_PASSWORD`) and store it in `config.encrypted_api_key`.
-- [ ] Step 2 — Voice profile: mono textarea (~280px), prefilled with a starter markdown profile. On Continue, save to `voice_profile.markdown`.
-- [ ] Step 3 — Post corpus: mono textarea expecting JSON. Detect counts and date range live as the user types. On Finish setup, parse the JSON, validate with Zod, bulk-insert into `posts`, set `config.setup_completed_at`.
-- [ ] Add server-side guard: if `setup_completed_at` is null and the user is authenticated, redirect them from `/` to `/setup`. Once setup is complete, `/setup` redirects to `/`.
-- [ ] Each step has Skip / Back / Continue per design. Skipped steps can be completed later from Settings.
+- [x] Create `app/setup/page.tsx` and supporting components per design Section 2.
+- [x] Step 1 — Connect a model: provider select + API key password input. On "Test and continue", make a single test request to the provider. If it succeeds, encrypt the key (use `@/lib/crypto.ts` — write a small wrapper around Node's `crypto` AES-GCM with a key derived from `AUTH_PASSWORD`) and store it in `config.encrypted_api_key`.
+- [x] Step 2 — Voice profile: mono textarea (~280px), prefilled with a starter markdown profile. On Continue, save to `voice_profile.markdown`.
+- [x] Step 3 — Post corpus: mono textarea expecting JSON. Detect counts and date range live as the user types. On Finish setup, parse the JSON, validate with Zod, bulk-insert into `posts`, set `config.setup_completed_at`.
+- [x] Add server-side guard: if `setup_completed_at` is null and the user is authenticated, redirect them from `/` to `/setup`. Once setup is complete, `/setup` redirects to `/`.
+- [x] Each step has Skip / Back / Continue per design. Skipped steps can be completed later from Settings.
 
 **Acceptance:** fresh deploy → login → wizard → 3 steps → workspace. Each step's data persists. Mid-wizard reload returns to the same step.
+
+Resume behavior: a visit to `/setup` (no `?step=` hint) derives the next-needed step from server state and redirects to `/setup?step=N`. Resolves my open question 6 from the kickoff summary.
 
 ## Phase 5: UI primitives ✅ (built before Phase 4 by design judgment, so the wizard composes them)
 
