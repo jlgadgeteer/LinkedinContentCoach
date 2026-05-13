@@ -116,15 +116,15 @@ Resume behavior: a visit to `/setup` (no `?step=` hint) derives the next-needed 
 
 **Acceptance:** all four actions stream cleanly. No layout shift on first token. Errors render per the "Output failed" pattern (danger dot, status code, partial output preserved, Try again button).
 
-## Phase 8: Settings page
+## Phase 8: Settings page ✅
 
 **Goal:** Settings matches design Section 9 with four cards and working save actions.
 
-- [ ] `app/settings/page.tsx` with four cards: Provider & API key, Voice profile, Post corpus, Backup & restore.
-- [ ] Provider card: two-column grid (provider select + API key password input). `Test connection` runs a real test request. `Last verified` updates on success.
-- [ ] Voice profile card: mono textarea (180px) editing the markdown. Footer shows `Nlines · NKB` left, Revert + Save right.
-- [ ] Post corpus card: stats strip on sunken surface (POSTS · 47, RANGE, INDEXED). Re-index, Replace corpus, Add posts buttons.
-- [ ] Backup & restore card: Restore from file + Download backup secondary buttons. Download exports a JSON of voice profile + posts (no API key).
+- [x] `app/settings/page.tsx` with four cards: Provider & API key, Voice profile, Post corpus, Backup & restore.
+- [x] Provider card: two-column grid (provider select + API key password input). `Test connection` runs a real test request. `Last verified` updates on success.
+- [x] Voice profile card: mono textarea (180px) editing the markdown. Footer shows `Nlines · NKB` left, Revert + Save right.
+- [x] Post corpus card: stats strip on sunken surface (POSTS · 47, RANGE · …, LAST LOADED · …). Replace corpus and Add posts open an inline mono textarea. `Re-index` is intentionally deferred to Phase 9 (no embedding index yet).
+- [x] Backup & restore card: Restore from file + Download backup secondary buttons. Download exports a JSON of voice profile + posts (no API key). Restore uses `replacePostsAction` on the file's `posts` array; voice profile in the file is intentionally left for the user to paste manually rather than silently clobbering theirs.
 
 **Acceptance:** match `design/screens.html` Section 9. Each card saves independently. `Last saved Nm ago` badge updates on any save.
 

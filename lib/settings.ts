@@ -1,0 +1,73 @@
+import "server-only";
+import { sql } from "@vercel/postgres";
+
+export type SettingsSnapshot = {
+  provider: "anthropic" | "openai" | null;
+  model: string | null;
+  hasApiKey: boolean;
+  lastVerifiedAt: string | null;
+  voiceProfileMarkdown: string;
+  voiceProfileUpdatedAt: string | null;
+  postCount: number;
+  postDateRange: { oldest: string | null; newest: string | null };
+  postsCreatedAt: string | null;
+  lastSavedAt: string | null;
+};
+
+export async function getSettingsSnapshot(): Promise<SettingsSnapshot> {
+  const cfg = await sql<{
+    provider: string | null;
+    model: string | null;
+    encrypted_api_key: string | null;
+    last_verified_at: string | null;
+    updated_at: string | null;
+  }>`SELECT provider, model, encrypted_api_key, last_verified_at::text, updated_at::text FROM config WHERE id = 1 LIMIT 1`;
+
+  const voice = await sql<{
+    markdown: string;
+    updated_at: string | null;
+  }>`SELECT markdown, updated_at::text FROM voice_profile WHERE id = 1 LIMIT 1`;
+
+  const stats = await sql<{
+    count: number;
+    oldest: string | null;
+    newest: string | null;
+    latest_created: string | null;
+  }>`
+    SELECT
+      COUNT(*)::int AS count,
+      MIN(published_at)::text AS oldest,
+      MAX(published_at)::text AS newest,
+      MAX(created_at)::text AS latest_created
+    FROM posts
+  `;
+
+  const cfgRow = cfg.rows[0];
+  const voiceRow = voice.rows[0];
+  const statsRow = stats.rows[0];
+
+  const provider =
+    cfgRow?.provider === "anthropic" || cfgRow?.provider === "openai"
+      ? cfgRow.provider
+      : null;
+
+  const lastCandidates = [cfgRow?.updated_at, voiceRow?.updated_at, statsRow?.latest_created]
+    .filter((x): x is string => !!x)
+    .sort();
+
+  return {
+    provider,
+    model: cfgRow?.model ?? null,
+    hasApiKey: !!cfgRow?.encrypted_api_key,
+    lastVerifiedAt: cfgRow?.last_verified_at ?? null,
+    voiceProfileMarkdown: voiceRow?.markdown ?? "",
+    voiceProfileUpdatedAt: voiceRow?.updated_at ?? null,
+    postCount: statsRow?.count ?? 0,
+    postDateRange: {
+      oldest: statsRow?.oldest ?? null,
+      newest: statsRow?.newest ?? null,
+    },
+    postsCreatedAt: statsRow?.latest_created ?? null,
+    lastSavedAt: lastCandidates.length ? lastCandidates[lastCandidates.length - 1]! : null,
+  };
+}
