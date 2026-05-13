@@ -1,8 +1,8 @@
 {
   "name": "linkedin-content-coach",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Open-source LinkedIn content coach. BYO Claude or OpenAI API key. All data stays in your browser.",
+  "description": "Open-source LinkedIn content coach. BYO Claude or OpenAI API key. Self-deployed to Vercel, single-user, Postgres-backed.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -17,6 +17,10 @@
     "ai": "^4.0.0",
     "@ai-sdk/anthropic": "^1.0.0",
     "@ai-sdk/openai": "^1.0.0",
+    "@vercel/postgres": "^0.10.0",
+    "drizzle-orm": "^0.36.0",
+    "next-auth": "5.0.0-beta.25",
+    "bcryptjs": "^2.4.3",
     "dexie": "^4.0.10",
     "dexie-react-hooks": "^1.1.7",
     "zod": "^3.23.8"
@@ -26,6 +30,8 @@
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@types/bcryptjs": "^2.4.6",
+    "drizzle-kit": "^0.28.0",
     "tailwindcss": "^4.0.0",
     "@tailwindcss/postcss": "^4.0.0",
     "postcss": "^8.4.49",

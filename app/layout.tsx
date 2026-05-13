@@ -1,11 +1,38 @@
 import type { Metadata } from "next";
+import { Inter, Source_Serif_4, JetBrains_Mono } from "next/font/google";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/theme-toggle";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const sourceSerif = Source_Serif_4({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  style: ["normal", "italic"],
+  variable: "--font-source-serif",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-jetbrains-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "LinkedIn Content Coach",
-  description: "Open-source LinkedIn writing tool. BYO API key. All data stays in your browser.",
+  title: "Content Coach",
+  description:
+    "Open-source LinkedIn writing tool. Self-hosted to Vercel, single user, your API key, your data.",
 };
+
+const NO_FLASH_THEME_SCRIPT = `(function(){try{var s=localStorage.getItem('theme');var d;if(!s||s==='system'){d=window.matchMedia('(prefers-color-scheme: dark)').matches;}else{d=s==='dark';}document.documentElement.setAttribute('data-theme',d?'dark':'light');}catch(e){}})();`;
 
 export default function RootLayout({
   children,
@@ -13,49 +40,64 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}
+    >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: NO_FLASH_THEME_SCRIPT }} />
+      </head>
       <body>
-        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
           <header
             style={{
-              borderBottom: "1px solid var(--color-border)",
-              padding: "0.875rem 1.5rem",
+              padding: "20px 32px",
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              background: "var(--color-bg)",
+              gap: 24,
             }}
           >
             <Link
               href="/"
-              style={{
-                fontWeight: 600,
-                fontSize: 16,
-                color: "var(--color-text)",
-                textDecoration: "none",
-                letterSpacing: "-0.01em",
-              }}
+              style={{ textDecoration: "none", color: "inherit" }}
+              aria-label="Content Coach, home"
             >
-              Coach
+              <div className="brand">
+                Content Coach
+                <small>v0.2 · personal</small>
+              </div>
             </Link>
-            <nav style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-              <Link href="/" className="btn btn-ghost">Workspace</Link>
-              <Link href="/settings" className="btn btn-ghost">Settings</Link>
-            </nav>
+            <ThemeToggle />
           </header>
-          <main style={{ flex: 1, padding: "2rem 1.5rem", maxWidth: 880, width: "100%", margin: "0 auto" }}>
-            {children}
-          </main>
-          <footer
+
+          <main
             style={{
-              borderTop: "1px solid var(--color-border)",
-              padding: "0.875rem 1.5rem",
-              fontSize: 12,
-              color: "var(--color-text-subtle)",
-              textAlign: "center",
+              flex: 1,
+              padding: "32px",
+              width: "100%",
             }}
           >
-            All data lives in your browser. Your API key is sent per-request and never logged.
+            {children}
+          </main>
+
+          <footer
+            style={{
+              padding: "20px 32px 28px",
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              letterSpacing: "0.04em",
+              color: "var(--color-fg-faint)",
+            }}
+          >
+            Self-hosted. Your API key and post history live in your own Vercel project.
           </footer>
         </div>
       </body>
