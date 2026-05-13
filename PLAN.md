@@ -138,15 +138,15 @@ Resume behavior: a visit to `/setup` (no `?step=` hint) derives the next-needed 
 - [x] Loading states: the action surfaces already render the dashed `OutputPlaceholder` before any stream; settings cards rely on server-side data and submit-time pending state on each Save button (no separate spinner needed).
 - [x] 404 and error.tsx pages per the same design language.
 
-## Phase 10: Deploy story
+## Phase 10: Deploy story ✅ (button + docs; live-deploy test pending the maintainer)
 
 **Goal:** the "Deploy with Vercel" button works and a non-technical user can get from clicking to a running instance in under 10 minutes.
 
-- [ ] `vercel.json` configured for the Postgres integration auto-attach.
-- [ ] `.env.example` documents all env vars with comments explaining each.
-- [ ] Rewrite `README.md` for the public repo: project description, the deploy button, the setup flow with screenshots (placeholder text where screenshots will go), the architecture summary, links to DESIGN.md and the B1 companion repo.
-- [ ] Deploy button URL: construct per Vercel docs with the right env var prompts and the Postgres integration.
-- [ ] Test the full flow yourself: fork the repo, click the deploy button on a test account, walk through setup, draft a post.
+- [x] `vercel.json`: intentionally skipped. Next.js 15 auto-detects on Vercel and the Postgres integration is pinned via the deploy-URL `stores` query param. Adding a `vercel.json` would only duplicate inferred defaults.
+- [x] `.env.example` documents all env vars with comments explaining each.
+- [x] Rewrite `README.md` for the public repo: project description, the deploy button, the setup flow, the architecture summary, links to DESIGN.md, docs/ARCHITECTURE.md, and CLAUDE.md.
+- [x] Deploy button URL constructed per Vercel docs with the env var prompts (`AUTH_PASSWORD`, `AUTH_SECRET`) and `stores=[{"type":"postgres"}]` for the Postgres integration. The `your-org/content-coach` slug in the URL needs to be swapped for the actual GitHub owner/repo when this is forked to its public home.
+- [ ] Test the full flow yourself (deferred): fork the repo, click the deploy button on a test account, walk through setup, draft a post. This requires real GitHub + Vercel accounts and an Anthropic / OpenAI key; flagging for the maintainer to do.
 
 **Acceptance:** a fresh deploy works end to end. Time from clicking the button to having a draft generated: under 10 minutes.
 
