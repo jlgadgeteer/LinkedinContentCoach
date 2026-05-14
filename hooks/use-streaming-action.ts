@@ -2,13 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export type ActionKind = "draft" | "ideate" | "search" | "check";
+export type ActionKind = "draft" | "ideate" | "search" | "check" | "revise";
 
 export type ActionPayload = {
   action: ActionKind;
   topic?: string;
   draft?: string;
   query?: string;
+  original?: string;
+  instruction?: string;
 };
 
 export type StreamStatus = "idle" | "streaming" | "done" | "fail";

@@ -2,6 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   addPostsAction,
@@ -22,7 +24,7 @@ function formatTimestamp(iso: string | null): string {
   return d.toISOString().slice(0, 16).replace("T", " · ");
 }
 
-type Mode = "idle" | "add" | "replace";
+type Mode = "idle" | "add" | "replace" | "quick";
 
 export function CorpusCard({
   postCount,
@@ -87,16 +89,21 @@ export function CorpusCard({
 
       {mode === "idle" ? (
         <div className="settings-card__foot">
-          <span className="eyebrow">Bulk operations</span>
+          <span className="eyebrow">Add or replace</span>
           <div style={{ display: "flex", gap: 8 }}>
+            <Button variant="secondary" type="button" onClick={() => setMode("quick")}>
+              Quick add one
+            </Button>
             <Button variant="secondary" type="button" onClick={() => setMode("replace")}>
               Replace corpus
             </Button>
             <Button variant="secondary" type="button" onClick={() => setMode("add")}>
-              Add posts
+              Add JSON batch
             </Button>
           </div>
         </div>
+      ) : mode === "quick" ? (
+        <QuickAddForm onDone={() => setMode("idle")} />
       ) : (
         <form action={action}>
           <Textarea
@@ -166,5 +173,107 @@ function Stat({ label, value }: { label: string; value: string }) {
       </div>
       <div style={{ fontSize: 13, color: "var(--color-fg)" }}>{value}</div>
     </div>
+  );
+}
+
+function QuickAddForm({ onDone }: { onDone: () => void }) {
+  const [url, setUrl] = useState("");
+  const [text, setText] = useState("");
+  const [publishedAt, setPublishedAt] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [ok, setOk] = useState<string | null>(null);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setErr(null);
+    setOk(null);
+    try {
+      const res = await fetch("/api/posts/quick-add", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          url: url.trim() || undefined,
+          text: text.trim() || undefined,
+          publishedAt: publishedAt.trim() || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error ?? `HTTP ${res.status}`);
+      }
+      setOk("Added to corpus.");
+      setUrl("");
+      setText("");
+      setPublishedAt("");
+    } catch (e2) {
+      setErr(e2 instanceof Error ? e2.message : "Network error");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div>
+        <Label htmlFor="qa-url" hint="Optional. We try to read OG metadata; LinkedIn often blocks this.">
+          LinkedIn post URL
+        </Label>
+        <Input
+          id="qa-url"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="https://www.linkedin.com/posts/..."
+          autoComplete="off"
+        />
+      </div>
+      <div>
+        <Label htmlFor="qa-text" hint="Required if URL fetch can't recover the body.">
+          Post text
+        </Label>
+        <Textarea
+          id="qa-text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Paste the full post text here. The first non-empty line becomes the hook automatically."
+          style={{ minHeight: 140 }}
+        />
+      </div>
+      <div>
+        <Label htmlFor="qa-date" hint="Optional. Defaults to today.">
+          Published at
+        </Label>
+        <Input
+          id="qa-date"
+          type="datetime-local"
+          value={publishedAt}
+          onChange={(e) => setPublishedAt(e.target.value)}
+        />
+      </div>
+      {err ? (
+        <p role="alert" style={{ fontSize: 13, color: "var(--color-danger)" }}>
+          {err}
+        </p>
+      ) : null}
+      {ok ? (
+        <p style={{ fontSize: 13, color: "var(--color-success)" }}>{ok}</p>
+      ) : null}
+      <div style={{ display: "flex", gap: 8 }}>
+        <Button
+          type="submit"
+          variant="primary"
+          streaming={busy}
+          streamingLabel="Saving"
+          disabled={!url.trim() && !text.trim()}
+        >
+          Add to corpus
+        </Button>
+        <Button type="button" variant="ghost" onClick={onDone}>
+          Done
+        </Button>
+      </div>
+    </form>
   );
 }

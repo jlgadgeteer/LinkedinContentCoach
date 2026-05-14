@@ -2,7 +2,13 @@
 // requested action, the user's voice profile, their post corpus, and the input.
 
 import type { Action, Post } from "../types";
-import { DRAFT_SKILL, IDEATE_SKILL, SEARCH_SKILL, CHECK_SKILL } from "./skills";
+import {
+  DRAFT_SKILL,
+  IDEATE_SKILL,
+  SEARCH_SKILL,
+  CHECK_SKILL,
+  REVISE_SKILL,
+} from "./skills";
 
 const SYSTEM_BASE = `You are this creator's LinkedIn content coach. You help them turn ideas into posts that sound like them, not like an LLM. The voice profile and post history below are authoritative.
 
@@ -23,6 +29,8 @@ function skillFor(action: Action): string {
       return SEARCH_SKILL;
     case "check":
       return CHECK_SKILL;
+    case "revise":
+      return REVISE_SKILL;
   }
 }
 
@@ -86,6 +94,8 @@ export function buildUserMessage(args: {
   topic?: string;
   draft?: string;
   query?: string;
+  original?: string;
+  instruction?: string;
 }): string {
   switch (args.action) {
     case "draft":
@@ -102,5 +112,15 @@ export function buildUserMessage(args: {
         : "Show me my most recent posts.";
     case "check":
       return `Run a quality check on this draft and return findings with specific fixes:\n\n${args.draft ?? "(no draft provided)"}`;
+    case "revise":
+      return [
+        "Here is the existing draft:",
+        "",
+        args.original ?? "(no draft provided)",
+        "",
+        "Apply this revision:",
+        "",
+        args.instruction ?? "(no instruction provided)",
+      ].join("\n");
   }
 }

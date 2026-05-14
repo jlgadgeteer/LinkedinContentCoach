@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { OutputBlock, OutputPlaceholder } from "@/components/output/output-block";
 import { PageHeader } from "@/components/ui/page-header";
 import { FormattedOutput } from "@/components/actions/format-output";
@@ -40,6 +42,13 @@ type Props = {
    * idea cards). When streaming or failed, the default rendering is used.
    */
   renderDone?: (text: string) => React.ReactNode;
+  /**
+   * When true, after a successful run the user sees an inline "Revise"
+   * input and a button that re-runs /api/generate with action=revise,
+   * passing the current output as `original` and their text as `instruction`.
+   * The new output replaces the current state.
+   */
+  supportsRevision?: boolean;
 };
 
 export function ActionShell({
@@ -54,11 +63,25 @@ export function ActionShell({
   children,
   formatPosts,
   renderDone,
+  supportsRevision,
 }: Props) {
   const { state, run, cancel } = useStreamingAction();
   const isStreaming = state.status === "streaming";
   const isDone = state.status === "done";
   const isFail = state.status === "fail";
+  const [reviseText, setReviseText] = React.useState("");
+
+  function runRevision() {
+    if (state.status !== "done") return;
+    const instruction = reviseText.trim();
+    if (!instruction) return;
+    void run({
+      action: "revise",
+      original: state.text,
+      instruction,
+    });
+    setReviseText("");
+  }
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,6 +181,49 @@ export function ActionShell({
           </OutputBlock>
         )}
       </div>
+
+      {supportsRevision && isDone ? (
+        <section
+          aria-label="Revise this draft"
+          style={{
+            marginTop: 18,
+            padding: 16,
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-md)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+          }}
+        >
+          <Label htmlFor="revision-instruction">Revise this draft</Label>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Input
+              id="revision-instruction"
+              value={reviseText}
+              onChange={(e) => setReviseText(e.target.value)}
+              placeholder="Tighten the hook · Cut by 30% · Drop the bullets"
+              size="lg"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && reviseText.trim().length > 0) {
+                  e.preventDefault();
+                  runRevision();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={runRevision}
+              disabled={reviseText.trim().length === 0}
+            >
+              Revise
+            </Button>
+          </div>
+          <span className="eyebrow">
+            Replaces the draft above. Original is saved in Drafts under its previous title.
+          </span>
+        </section>
+      ) : null}
     </div>
   );
 }

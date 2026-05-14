@@ -29,6 +29,7 @@ export function DraftView({
       canSubmit={topic.trim().length > 0}
       buildPayload={() => (topic.trim() ? { topic: topic.trim() } : null)}
       formatPosts
+      supportsRevision
     >
       <div>
         <Label htmlFor="topic">Topic</Label>
