@@ -5,6 +5,7 @@ import { authConfig } from "@/lib/auth.config";
 import { getResolvedProvider } from "@/lib/api-key";
 import { streamCompletion } from "@/lib/llm";
 import { getPostsForPrompt, getVoiceProfileMarkdown } from "@/lib/posts";
+import { getKnowledgeMarkdown } from "@/lib/knowledge";
 import { buildSystemPrompt, buildUserMessage } from "@/lib/prompts";
 import { extractPostBody, titleFromBody } from "@/lib/drafts";
 import { getQualityRulesMarkdown } from "@/lib/quality-rules";
@@ -83,15 +84,17 @@ export async function POST(req: Request) {
 
   const { action, topic, draft, query, mode } = parsed.data;
 
-  const [voiceProfile, posts, qualityRules, actionSettings, writingMode] = await Promise.all([
-    getVoiceProfileMarkdown(),
-    getPostsForPrompt(),
-    action === "draft" || action === "check"
-      ? getQualityRulesMarkdown()
-      : Promise.resolve(""),
-    getActionSettings(),
-    action === "draft" && mode ? getWritingModeBySlug(mode) : Promise.resolve(null),
-  ]);
+  const [voiceProfile, posts, knowledge, qualityRules, actionSettings, writingMode] =
+    await Promise.all([
+      getVoiceProfileMarkdown(),
+      getPostsForPrompt(),
+      getKnowledgeMarkdown(),
+      action === "draft" || action === "check"
+        ? getQualityRulesMarkdown()
+        : Promise.resolve(""),
+      getActionSettings(),
+      action === "draft" && mode ? getWritingModeBySlug(mode) : Promise.resolve(null),
+    ]);
 
   const inputForTitle = topic ?? query ?? draft ?? "";
   const recentTitle = titleFor(action, inputForTitle);
@@ -118,6 +121,7 @@ export async function POST(req: Request) {
     action,
     voiceProfile,
     posts,
+    knowledge,
     qualityRules,
     writingMode: writingMode
       ? { name: writingMode.name, markdown: writingMode.markdown }

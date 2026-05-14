@@ -44,12 +44,17 @@ export function buildSystemPrompt(args: {
   action: Action;
   voiceProfile: string;
   posts: Post[];
+  knowledge?: string;
   qualityRules?: string;
   writingMode?: { name: string; markdown: string } | null;
 }): string {
   const voiceBlock = args.voiceProfile.trim().length > 0
     ? args.voiceProfile.trim()
     : "(No voice profile loaded. Use sensible LinkedIn defaults and ask the creator to fill in their voice profile in Settings.)";
+
+  const knowledgeBlock = args.knowledge && args.knowledge.trim().length > 0
+    ? args.knowledge.trim()
+    : null;
 
   const sections: string[] = [
     SYSTEM_BASE,
@@ -62,6 +67,17 @@ export function buildSystemPrompt(args: {
     "",
     voiceBlock,
   ];
+
+  if (knowledgeBlock) {
+    sections.push(
+      "",
+      "## Knowledge profile",
+      "",
+      "These are the topics this creator owns, the opinions they hold, and the audience they write for. Treat as authoritative for what to write about; voice profile remains authoritative for how.",
+      "",
+      knowledgeBlock,
+    );
+  }
 
   // Inject the user's editable quality rules into both Draft (so the model
   // avoids these patterns up front) and Check (so it grades against them).

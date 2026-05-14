@@ -121,9 +121,51 @@ async function run(): Promise<void> {
     );
   `;
 
+  // Interview Me: knowledge profile is a singleton like voice_profile, edited
+  // by AI synthesis after each session and by the user directly in Settings.
+  await sql`
+    CREATE TABLE IF NOT EXISTS knowledge_profile (
+      id integer PRIMARY KEY DEFAULT 1,
+      markdown text NOT NULL DEFAULT '',
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT knowledge_profile_singleton CHECK (id = 1)
+    );
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS interview_sessions (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      started_at timestamptz NOT NULL DEFAULT now(),
+      ended_at timestamptz,
+      status text NOT NULL DEFAULT 'active',
+      questions_count integer NOT NULL DEFAULT 0,
+      dimensions_covered jsonb NOT NULL DEFAULT '{}'::jsonb,
+      summary text,
+      proposed_voice_profile text,
+      proposed_knowledge text,
+      CONSTRAINT interview_sessions_status_check
+        CHECK (status IN ('active', 'ended', 'applied', 'cancelled'))
+    );
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS interview_qa (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      session_id uuid NOT NULL REFERENCES interview_sessions(id) ON DELETE CASCADE,
+      position integer NOT NULL,
+      dimension text,
+      question text NOT NULL,
+      answer text,
+      asked_at timestamptz NOT NULL DEFAULT now(),
+      answered_at timestamptz
+    );
+  `;
+
   await sql`CREATE INDEX IF NOT EXISTS posts_published_at_idx ON posts (published_at DESC);`;
   await sql`CREATE INDEX IF NOT EXISTS recent_actions_at_idx ON recent_actions (at DESC);`;
   await sql`CREATE INDEX IF NOT EXISTS drafts_status_idx ON drafts (status);`;
   await sql`CREATE INDEX IF NOT EXISTS drafts_scheduled_for_idx ON drafts (scheduled_for);`;
   await sql`CREATE INDEX IF NOT EXISTS writing_modes_position_idx ON writing_modes (position);`;
+  await sql`CREATE INDEX IF NOT EXISTS interview_qa_session_idx ON interview_qa (session_id, position);`;
+  await sql`CREATE INDEX IF NOT EXISTS interview_sessions_started_idx ON interview_sessions (started_at DESC);`;
 }
