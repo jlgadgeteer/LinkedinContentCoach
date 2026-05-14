@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,10 +42,28 @@ export function ProviderCard({
 }) {
   const [provider, setProvider] = useState<Provider>(initialProvider ?? "anthropic");
   const modelChoices = useMemo(() => MODELS[provider], [provider]);
+
   const startingModel = initialModel ?? modelChoices[0]!.id;
   const startingIsCustom = !modelChoices.some((m) => m.id === startingModel);
   const [model, setModel] = useState<string>(startingModel);
   const [isCustom, setIsCustom] = useState<boolean>(startingIsCustom);
+
+  // When the provider changes (user picking a different provider in the
+  // dropdown), reset the model to the first option of the new catalog. Without
+  // this, the model state can stay on the previous provider's ID, which both
+  // breaks the visible selection and submits the wrong model on save.
+  // We skip the first run so the initial server-side model isn't clobbered
+  // by the catalog's first entry on mount.
+  const isFirstProviderRunRef = useRef(true);
+  useEffect(() => {
+    if (isFirstProviderRunRef.current) {
+      isFirstProviderRunRef.current = false;
+      return;
+    }
+    const first = MODELS[provider][0]!.id;
+    setModel(first);
+    setIsCustom(false);
+  }, [provider]);
 
   const [saveState, saveAction, savePending] = useActionState(
     saveProviderSettingsAction,
@@ -76,12 +94,7 @@ export function ProviderCard({
               id="provider"
               name="provider"
               value={provider}
-              onChange={(e) => {
-                const next = e.target.value as Provider;
-                setProvider(next);
-                setModel(MODELS[next][0]!.id);
-                setIsCustom(false);
-              }}
+              onChange={(e) => setProvider(e.target.value as Provider)}
             >
               <option value="anthropic">Anthropic</option>
               <option value="openai">OpenAI</option>
@@ -90,6 +103,10 @@ export function ProviderCard({
           <div>
             <Label htmlFor="model-select">Model</Label>
             <Select
+              // key forces a clean remount of the underlying <select> when the
+              // provider changes, so the browser never displays a stale label
+              // from the previous catalog.
+              key={`model-${provider}`}
               id="model-select"
               value={isCustom ? CUSTOM : model}
               onChange={(e) => {
@@ -116,7 +133,7 @@ export function ProviderCard({
                   name="model"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  placeholder={provider === "openai" ? "gpt-5-codex-2026-01" : "claude-sonnet-4-7-20260201"}
+                  placeholder={provider === "openai" ? "gpt-5.5-pro" : "claude-sonnet-4-7"}
                   autoComplete="off"
                   spellCheck={false}
                 />
