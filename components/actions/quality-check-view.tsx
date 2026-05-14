@@ -5,8 +5,8 @@ import { ActionShell } from "@/components/actions/action-shell";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-export function QualityCheckView() {
-  const [draft, setDraft] = useState<string>("");
+export function QualityCheckView({ defaultDraft }: { defaultDraft?: string }) {
+  const [draft, setDraft] = useState<string>(defaultDraft ?? "");
 
   return (
     <ActionShell

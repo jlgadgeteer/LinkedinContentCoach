@@ -4,9 +4,14 @@ import { getSetupState } from "@/lib/setup";
 
 export const dynamic = "force-dynamic";
 
-export default async function IdeatePage() {
+export default async function IdeatePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ topic?: string }>;
+}) {
   if (!process.env.POSTGRES_URL) return null;
   const setup = await getSetupState();
   if (!setup.isComplete) redirect("/setup");
-  return <IdeateView />;
+  const params = await searchParams;
+  return <IdeateView defaultTopic={params.topic} />;
 }

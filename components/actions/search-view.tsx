@@ -5,8 +5,8 @@ import { ActionShell } from "@/components/actions/action-shell";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export function SearchView() {
-  const [query, setQuery] = useState<string>("");
+export function SearchView({ defaultQuery }: { defaultQuery?: string }) {
+  const [query, setQuery] = useState<string>(defaultQuery ?? "");
 
   return (
     <ActionShell

@@ -13,17 +13,23 @@ import {
 
 type Provider = "anthropic" | "openai";
 
+const CUSTOM = "__custom__";
+
 const MODELS: Record<Provider, { id: string; label: string }[]> = {
   anthropic: [
-    { id: "claude-opus-4-7", label: "Claude Opus 4.7" },
+    { id: "claude-opus-4-7", label: "Claude Opus 4.7 (top tier)" },
+    { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6 (balanced)" },
     { id: "claude-opus-4-6", label: "Claude Opus 4.6" },
-    { id: "claude-sonnet-4-6", label: "Claude Sonnet 4.6" },
-    { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5" },
+    { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 (fast)" },
   ],
   openai: [
-    { id: "gpt-4o", label: "GPT-4o" },
-    { id: "gpt-4o-mini", label: "GPT-4o mini" },
-    { id: "gpt-4-turbo", label: "GPT-4 Turbo" },
+    { id: "gpt-5", label: "GPT-5 (top tier)" },
+    { id: "gpt-5-mini", label: "GPT-5 mini (faster, cheaper)" },
+    { id: "gpt-5-nano", label: "GPT-5 nano (cheapest)" },
+    { id: "o3", label: "o3 (deep reasoning, slow + expensive)" },
+    { id: "o4-mini", label: "o4-mini (cheaper reasoning)" },
+    { id: "gpt-4o", label: "GPT-4o (legacy general)" },
+    { id: "gpt-4o-mini", label: "GPT-4o mini (legacy cheap)" },
   ],
 };
 
@@ -53,7 +59,10 @@ export function ProviderCard({
 }) {
   const [provider, setProvider] = useState<Provider>(initialProvider ?? "anthropic");
   const modelChoices = useMemo(() => MODELS[provider], [provider]);
-  const [model, setModel] = useState<string>(initialModel ?? modelChoices[0]!.id);
+  const startingModel = initialModel ?? modelChoices[0]!.id;
+  const startingIsCustom = !modelChoices.some((m) => m.id === startingModel);
+  const [model, setModel] = useState<string>(startingModel);
+  const [isCustom, setIsCustom] = useState<boolean>(startingIsCustom);
 
   const [saveState, saveAction, savePending] = useActionState(
     saveProviderSettingsAction,
@@ -88,6 +97,7 @@ export function ProviderCard({
                 const next = e.target.value as Provider;
                 setProvider(next);
                 setModel(MODELS[next][0]!.id);
+                setIsCustom(false);
               }}
             >
               <option value="anthropic">Anthropic</option>
@@ -95,19 +105,45 @@ export function ProviderCard({
             </Select>
           </div>
           <div>
-            <Label htmlFor="model">Model</Label>
+            <Label htmlFor="model-select">Model</Label>
             <Select
-              id="model"
-              name="model"
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
+              id="model-select"
+              value={isCustom ? CUSTOM : model}
+              onChange={(e) => {
+                const v = e.target.value;
+                if (v === CUSTOM) {
+                  setIsCustom(true);
+                } else {
+                  setIsCustom(false);
+                  setModel(v);
+                }
+              }}
             >
               {modelChoices.map((m) => (
                 <option key={m.id} value={m.id}>
                   {m.label}
                 </option>
               ))}
+              <option value={CUSTOM}>Custom model ID…</option>
             </Select>
+            {isCustom ? (
+              <div style={{ marginTop: 8 }}>
+                <Input
+                  id="model"
+                  name="model"
+                  value={model}
+                  onChange={(e) => setModel(e.target.value)}
+                  placeholder={provider === "openai" ? "gpt-5-codex-2026-01" : "claude-sonnet-4-7-20260201"}
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+                <p className="eyebrow" style={{ marginTop: 4 }}>
+                  Paste any model ID the provider exposes. Test before saving.
+                </p>
+              </div>
+            ) : (
+              <input type="hidden" name="model" value={model} />
+            )}
           </div>
         </div>
 
