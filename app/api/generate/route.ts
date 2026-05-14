@@ -5,6 +5,7 @@ import { authConfig } from "@/lib/auth.config";
 import { getResolvedProvider } from "@/lib/api-key";
 import { streamCompletion } from "@/lib/llm";
 import { getPostsForPrompt, getVoiceProfileMarkdown } from "@/lib/posts";
+import { getKnowledgeMarkdown } from "@/lib/knowledge";
 import { buildSystemPrompt, buildUserMessage } from "@/lib/prompts";
 import { extractPostBody, titleFromBody } from "@/lib/drafts";
 
@@ -77,9 +78,10 @@ export async function POST(req: Request) {
     );
   }
 
-  const [voiceProfile, posts] = await Promise.all([
+  const [voiceProfile, posts, knowledge] = await Promise.all([
     getVoiceProfileMarkdown(),
     getPostsForPrompt(),
+    getKnowledgeMarkdown(),
   ]);
 
   const { action, topic, draft, query } = parsed.data;
@@ -105,7 +107,7 @@ export async function POST(req: Request) {
   `;
   const recentId = inserted.rows[0]!.id;
 
-  const system = buildSystemPrompt({ action, voiceProfile, posts });
+  const system = buildSystemPrompt({ action, voiceProfile, posts, knowledge });
   const user = buildUserMessage({ action, topic, draft, query });
 
   try {

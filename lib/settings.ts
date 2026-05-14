@@ -8,6 +8,8 @@ export type SettingsSnapshot = {
   lastVerifiedAt: string | null;
   voiceProfileMarkdown: string;
   voiceProfileUpdatedAt: string | null;
+  knowledgeProfileMarkdown: string;
+  knowledgeProfileUpdatedAt: string | null;
   postCount: number;
   postDateRange: { oldest: string | null; newest: string | null };
   postsCreatedAt: string | null;
@@ -28,6 +30,11 @@ export async function getSettingsSnapshot(): Promise<SettingsSnapshot> {
     updated_at: string | null;
   }>`SELECT markdown, updated_at::text FROM voice_profile WHERE id = 1 LIMIT 1`;
 
+  const knowledge = await sql<{
+    markdown: string;
+    updated_at: string | null;
+  }>`SELECT markdown, updated_at::text FROM knowledge_profile WHERE id = 1 LIMIT 1`;
+
   const stats = await sql<{
     count: number;
     oldest: string | null;
@@ -44,6 +51,7 @@ export async function getSettingsSnapshot(): Promise<SettingsSnapshot> {
 
   const cfgRow = cfg.rows[0];
   const voiceRow = voice.rows[0];
+  const knowledgeRow = knowledge.rows[0];
   const statsRow = stats.rows[0];
 
   const provider =
@@ -51,7 +59,12 @@ export async function getSettingsSnapshot(): Promise<SettingsSnapshot> {
       ? cfgRow.provider
       : null;
 
-  const lastCandidates = [cfgRow?.updated_at, voiceRow?.updated_at, statsRow?.latest_created]
+  const lastCandidates = [
+    cfgRow?.updated_at,
+    voiceRow?.updated_at,
+    knowledgeRow?.updated_at,
+    statsRow?.latest_created,
+  ]
     .filter((x): x is string => !!x)
     .sort();
 
@@ -62,6 +75,8 @@ export async function getSettingsSnapshot(): Promise<SettingsSnapshot> {
     lastVerifiedAt: cfgRow?.last_verified_at ?? null,
     voiceProfileMarkdown: voiceRow?.markdown ?? "",
     voiceProfileUpdatedAt: voiceRow?.updated_at ?? null,
+    knowledgeProfileMarkdown: knowledgeRow?.markdown ?? "",
+    knowledgeProfileUpdatedAt: knowledgeRow?.updated_at ?? null,
     postCount: statsRow?.count ?? 0,
     postDateRange: {
       oldest: statsRow?.oldest ?? null,
