@@ -9,6 +9,7 @@ export type ActionPayload = {
   topic?: string;
   draft?: string;
   query?: string;
+  mode?: string;
 };
 
 export type StreamStatus = "idle" | "streaming" | "done" | "fail";

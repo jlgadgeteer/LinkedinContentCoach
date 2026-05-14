@@ -214,49 +214,9 @@ If the session has too few answers to meaningfully update either document (fewer
 
 export const CHECK_SKILL = `# Quality-checking a LinkedIn post
 
-Scan the draft against the rules in the voice profile and the patterns below. Return findings as a short list followed by specific fixes. Do not show scores or grades.
+Scan the draft against the voice profile and the quality rules section below (which is user-editable). Return findings as a short list followed by specific fixes. Do not show scores or grades.
 
-## Red flags (must fix)
-
-These are AI tells. Every one is a fail:
-
-**Punctuation and structure:**
-- Em dashes (any em dash)
-- Three-part parallel constructions ("It's not X. It's Y. It's Z.")
-- Bolded phrases mid-sentence for emphasis
-- Recap paragraphs at the end
-
-**Openers:**
-- "In today's fast-paced world..."
-- "In the age of AI..."
-- "Let's dive in..."
-- "Here's the thing..."
-- "The truth is..."
-- "Make no mistake..."
-
-**LinkedIn cliches:**
-- Game-changer, synergy, leverage (as verb), deep dive, circle back, move the needle, unlock value, paradigm shift, North Star, 10x, low-hanging fruit, at the end of the day, drive outcomes, mission-critical
-
-**AI-tell vocabulary:**
-- Delve, myriad, tapestry, navigate (as verb), harness (as verb), robust (when "strong" would do), comprehensive (filler), seamless, cutting-edge, state-of-the-art, revolutionary
-
-**Closing patterns:**
-- "What are your thoughts?"
-- "Let me know in the comments."
-- "DM me if interested."
-- "Follow for more."
-- "I'm humbled..."
-
-## Yellow flags (review)
-
-- More than 2 emojis (default zero unless voice profile says otherwise).
-- Any hashtag unless explicitly requested.
-- Bullets in groups of exactly three.
-- Sentences over 25 words.
-- Paragraphs over 4 sentences.
-- A "P.S." or "Bonus tip" section.
-- Hook that takes more than 2 lines to land.
-- "Not just X, but Y" construction.
+The quality rules section enumerates AI tells, banned vocabulary, and structural anti-patterns. Treat every red flag as a fail and every yellow flag as something to surface for human review.
 
 ## Output format
 
