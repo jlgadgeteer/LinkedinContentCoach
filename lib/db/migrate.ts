@@ -67,6 +67,33 @@ async function run(): Promise<void> {
     );
   `;
 
+  // Columns added post-MVP so a recent row can be replayed and a draft action
+  // can link to a persisted draft row. Idempotent ALTERs keep the bootstrap
+  // safe for instances that ran an earlier version.
+  await sql`ALTER TABLE recent_actions ADD COLUMN IF NOT EXISTS action text;`;
+  await sql`ALTER TABLE recent_actions ADD COLUMN IF NOT EXISTS input_topic text;`;
+  await sql`ALTER TABLE recent_actions ADD COLUMN IF NOT EXISTS input_draft text;`;
+  await sql`ALTER TABLE recent_actions ADD COLUMN IF NOT EXISTS input_query text;`;
+  await sql`ALTER TABLE recent_actions ADD COLUMN IF NOT EXISTS output text;`;
+  await sql`ALTER TABLE recent_actions ADD COLUMN IF NOT EXISTS draft_id uuid;`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS drafts (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      title text NOT NULL,
+      topic text,
+      body text NOT NULL,
+      status text NOT NULL DEFAULT 'not_published',
+      scheduled_for timestamptz,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT drafts_status_check
+        CHECK (status IN ('not_published', 'scheduled', 'published'))
+    );
+  `;
+
   await sql`CREATE INDEX IF NOT EXISTS posts_published_at_idx ON posts (published_at DESC);`;
   await sql`CREATE INDEX IF NOT EXISTS recent_actions_at_idx ON recent_actions (at DESC);`;
+  await sql`CREATE INDEX IF NOT EXISTS drafts_status_idx ON drafts (status);`;
+  await sql`CREATE INDEX IF NOT EXISTS drafts_scheduled_for_idx ON drafts (scheduled_for);`;
 }

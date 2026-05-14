@@ -52,13 +52,15 @@ Generate 3 to 5 post ideas the creator could draft this week. Each idea has a on
 
 ## Output format
 
-Five ideas, numbered. Each idea formatted as:
+Wrap each idea in <idea> tags so the UI can render them as cards. Use this exact structure for every idea:
 
-**1. [Hook line]**
+<idea>
+Hook: [one-line hook the creator could open the post with]
 Angle: [one-line description of what the post actually argues or shows]
 Why now: [one phrase: natural follow-up, framework extension, etc.]
+</idea>
 
-Keep it tight. The creator wants to pick and move on.`;
+Emit between 3 and 5 of these blocks, in priority order. Do not add a preface, numbering, or commentary between or after the blocks. Keep each line short. The creator wants to pick and move on.`;
 
 export const SEARCH_SKILL = `# Searching past posts
 

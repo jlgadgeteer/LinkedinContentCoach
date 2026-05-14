@@ -54,8 +54,10 @@ export const posts = pgTable("posts", {
 });
 
 /**
- * Append-only log feeding the workspace's "Recent" section.
- * `kind` is one of DRAFT, IDEATE, SEARCH, QC (uppercased in storage).
+ * Append-only log feeding the workspace's "Recent" section. Each row is also
+ * the canonical record of a single action's input + output, so clicking a
+ * recent row can resume that session. `kind` is one of DRAFT, IDEATE, SEARCH,
+ * QC (uppercased); `action` is the lowercase enum the API route uses.
  */
 export const recentActions = pgTable("recent_actions", {
   id: serial("id").primaryKey(),
@@ -63,7 +65,35 @@ export const recentActions = pgTable("recent_actions", {
   kind: text("kind").notNull(),
   title: text("title").notNull(),
   ref: text("ref"),
+  action: text("action"),
+  inputTopic: text("input_topic"),
+  inputDraft: text("input_draft"),
+  inputQuery: text("input_query"),
+  output: text("output"),
+  draftId: uuid("draft_id"),
 });
+
+export const drafts = pgTable(
+  "drafts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    topic: text("topic"),
+    body: text("body").notNull(),
+    status: text("status").notNull().default("not_published"),
+    scheduledFor: timestamp("scheduled_for", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    statusCheck: check(
+      "drafts_status_check",
+      sql`${t.status} IN ('not_published', 'scheduled', 'published')`,
+    ),
+  }),
+);
+
+export type DraftStatus = "not_published" | "scheduled" | "published";
 
 export type Config = typeof config.$inferSelect;
 export type NewConfig = typeof config.$inferInsert;
@@ -73,3 +103,5 @@ export type PostRow = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
 export type RecentActionRow = typeof recentActions.$inferSelect;
 export type NewRecentAction = typeof recentActions.$inferInsert;
+export type DraftRow = typeof drafts.$inferSelect;
+export type NewDraft = typeof drafts.$inferInsert;

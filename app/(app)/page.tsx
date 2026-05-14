@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Banner } from "@/components/ui/banner";
 import { PageHeader, SectionHeader } from "@/components/ui/page-header";
-import { Button } from "@/components/ui/button";
 import { getSetupState } from "@/lib/setup";
 import { formatRelative, getWorkspaceSummary } from "@/lib/workspace";
 
@@ -99,19 +98,24 @@ export default async function WorkspacePage() {
         <section className="recent" aria-label="Recent">
           <div className="recent__head">
             <SectionHeader>Recent</SectionHeader>
-            <Button variant="ghost" size="sm">
-              View all
-            </Button>
+            <Link href="/drafts" className="btn btn--ghost btn--sm">
+              View drafts
+            </Link>
           </div>
-          <div className="recent__list">
+          <ul className="recent__list" style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {summary.recent.map((r) => (
-              <div key={r.id} className="recent__item">
-                <span className="recent__when">{formatRelative(r.at)}</span>
-                <span className="recent__title">{r.title}</span>
-                <span className="recent__kind">{r.kind}</span>
-              </div>
+              <li key={r.id}>
+                <Link
+                  href={`/recent/${r.id}`}
+                  className="recent__item recent__item--link"
+                >
+                  <span className="recent__when">{formatRelative(r.at)}</span>
+                  <span className="recent__title">{r.title}</span>
+                  <span className="recent__kind">{r.kind}</span>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </section>
       )}
     </div>

@@ -31,6 +31,7 @@ export async function streamCompletion(args: {
   system: string;
   user: string;
   temperature?: number;
+  onFinish?: (final: { text: string }) => void | Promise<void>;
 }) {
   const model = getModel({
     provider: args.provider,
@@ -43,5 +44,10 @@ export async function streamCompletion(args: {
     system: args.system,
     messages: [{ role: "user", content: args.user }],
     temperature: args.temperature ?? 0.7,
+    onFinish: args.onFinish
+      ? async ({ text }) => {
+          await args.onFinish!({ text });
+        }
+      : undefined,
   });
 }

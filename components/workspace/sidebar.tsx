@@ -13,6 +13,11 @@ const ACTIONS: NavItem[] = [
   { href: "/quality-check", label: "Quality check", kbd: "⌘4" },
 ];
 
+const LIBRARY: NavItem[] = [
+  { href: "/drafts", label: "Drafts" },
+  { href: "/calendar", label: "Calendar" },
+];
+
 const MANAGE: NavItem[] = [{ href: "/settings", label: "Settings" }];
 
 function isActive(pathname: string | null, href: string): boolean {
@@ -45,6 +50,22 @@ export function Sidebar() {
           >
             <span>{item.label}</span>
             {item.kbd ? <span className="nav-item__kbd">{item.kbd}</span> : null}
+          </Link>
+        ))}
+      </nav>
+
+      <nav className="nav-section" aria-label="Library">
+        <span className="nav-section__label">Library</span>
+        {LIBRARY.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={
+              "nav-item" + (isActive(pathname, item.href) ? " nav-item--active" : "")
+            }
+            aria-current={isActive(pathname, item.href) ? "page" : undefined}
+          >
+            <span>{item.label}</span>
           </Link>
         ))}
       </nav>

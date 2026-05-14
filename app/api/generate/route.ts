@@ -6,6 +6,7 @@ import { getResolvedProvider } from "@/lib/api-key";
 import { streamCompletion } from "@/lib/llm";
 import { getPostsForPrompt, getVoiceProfileMarkdown } from "@/lib/posts";
 import { buildSystemPrompt, buildUserMessage } from "@/lib/prompts";
+import { extractPostBody, titleFromBody } from "@/lib/drafts";
 
 // ADR-006: edge runtime for streaming.
 export const runtime = "edge";
@@ -84,12 +85,25 @@ export async function POST(req: Request) {
   const { action, topic, draft, query } = parsed.data;
 
   const inputForTitle = topic ?? query ?? draft ?? "";
-  // Record the recent action up front so the workspace can show it even
-  // if the stream fails mid-flight.
-  await sql`
-    INSERT INTO recent_actions (kind, title, ref)
-    VALUES (${KIND_BY_ACTION[action]}, ${titleFor(action, inputForTitle)}, NULL)
+  const recentTitle = titleFor(action, inputForTitle);
+
+  // Persist the input up front so the workspace can show the row even if the
+  // stream fails mid-flight. The output column gets filled in by onFinish.
+  const inserted = await sql<{ id: number }>`
+    INSERT INTO recent_actions (
+      kind, title, action, input_topic, input_draft, input_query
+    )
+    VALUES (
+      ${KIND_BY_ACTION[action]},
+      ${recentTitle},
+      ${action},
+      ${topic ?? null},
+      ${draft ?? null},
+      ${query ?? null}
+    )
+    RETURNING id
   `;
+  const recentId = inserted.rows[0]!.id;
 
   const system = buildSystemPrompt({ action, voiceProfile, posts });
   const user = buildUserMessage({ action, topic, draft, query });
@@ -102,6 +116,36 @@ export async function POST(req: Request) {
       system,
       user,
       temperature: action === "draft" ? 0.8 : 0.6,
+      onFinish: async ({ text }) => {
+        try {
+          if (action === "draft" && text.trim()) {
+            const postBody = extractPostBody(text);
+            const draftTitle = titleFromBody(postBody, recentTitle);
+            const created = await sql<{ id: string }>`
+              INSERT INTO drafts (title, topic, body, status)
+              VALUES (${draftTitle}, ${topic ?? null}, ${postBody}, 'not_published')
+              RETURNING id::text
+            `;
+            const draftId = created.rows[0]!.id;
+            await sql`
+              UPDATE recent_actions
+              SET output = ${text}, draft_id = ${draftId}::uuid
+              WHERE id = ${recentId}
+            `;
+          } else {
+            await sql`
+              UPDATE recent_actions
+              SET output = ${text}
+              WHERE id = ${recentId}
+            `;
+          }
+        } catch {
+          // Persistence is best-effort; the stream still went to the user.
+          // Logging through console keeps the edge runtime simple.
+          // eslint-disable-next-line no-console
+          console.warn("recent_actions / drafts persistence failed");
+        }
+      },
     });
     return result.toTextStreamResponse();
   } catch (err) {

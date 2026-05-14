@@ -35,6 +35,11 @@ type Props = {
   children: React.ReactNode;
   /** Use formatted <post> rendering on the output. Off for Ideate / Search / QC. */
   formatPosts?: boolean;
+  /**
+   * Custom done-state output renderer (used by Ideate to render clickable
+   * idea cards). When streaming or failed, the default rendering is used.
+   */
+  renderDone?: (text: string) => React.ReactNode;
 };
 
 export function ActionShell({
@@ -48,6 +53,7 @@ export function ActionShell({
   canSubmit,
   children,
   formatPosts,
+  renderDone,
 }: Props) {
   const { state, run, cancel } = useStreamingAction();
   const isStreaming = state.status === "streaming";
@@ -142,7 +148,9 @@ export function ActionShell({
             {isFail && state.error?.message && (
               <p className="muted" style={{ marginBottom: 8 }}>{state.error.message}</p>
             )}
-            {formatPosts && isDone ? (
+            {isDone && renderDone ? (
+              renderDone(state.text)
+            ) : formatPosts && isDone ? (
               <FormattedOutput text={state.text} />
             ) : (
               <div style={{ whiteSpace: "pre-wrap" }}>{state.text}</div>
