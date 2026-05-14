@@ -11,6 +11,7 @@ const ACTIONS: NavItem[] = [
   { href: "/ideate", label: "Ideate", kbd: "⌘2" },
   { href: "/search", label: "Search", kbd: "⌘3" },
   { href: "/quality-check", label: "Quality check", kbd: "⌘4" },
+  { href: "/interview", label: "Interview Me" },
 ];
 
 const LIBRARY: NavItem[] = [

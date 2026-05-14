@@ -95,6 +95,51 @@ export const drafts = pgTable(
 
 export type DraftStatus = "not_published" | "scheduled" | "published";
 
+export const knowledgeProfile = pgTable(
+  "knowledge_profile",
+  {
+    id: integer("id").primaryKey().default(1),
+    markdown: text("markdown").notNull().default(""),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    singleton: check("knowledge_profile_singleton", sql`${t.id} = 1`),
+  }),
+);
+
+export const interviewSessions = pgTable(
+  "interview_sessions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    startedAt: timestamp("started_at", { withTimezone: true }).defaultNow().notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    status: text("status").notNull().default("active"),
+    questionsCount: integer("questions_count").notNull().default(0),
+    summary: text("summary"),
+    proposedVoiceProfile: text("proposed_voice_profile"),
+    proposedKnowledge: text("proposed_knowledge"),
+  },
+  (t) => ({
+    statusCheck: check(
+      "interview_sessions_status_check",
+      sql`${t.status} IN ('active', 'ended', 'applied', 'cancelled')`,
+    ),
+  }),
+);
+
+export const interviewQa = pgTable("interview_qa", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  sessionId: uuid("session_id").notNull(),
+  position: integer("position").notNull(),
+  dimension: text("dimension"),
+  question: text("question").notNull(),
+  answer: text("answer"),
+  askedAt: timestamp("asked_at", { withTimezone: true }).defaultNow().notNull(),
+  answeredAt: timestamp("answered_at", { withTimezone: true }),
+});
+
+export type InterviewStatus = "active" | "ended" | "applied" | "cancelled";
+
 export type Config = typeof config.$inferSelect;
 export type NewConfig = typeof config.$inferInsert;
 export type VoiceProfileRow = typeof voiceProfile.$inferSelect;
@@ -105,3 +150,6 @@ export type RecentActionRow = typeof recentActions.$inferSelect;
 export type NewRecentAction = typeof recentActions.$inferInsert;
 export type DraftRow = typeof drafts.$inferSelect;
 export type NewDraft = typeof drafts.$inferInsert;
+export type KnowledgeProfileRow = typeof knowledgeProfile.$inferSelect;
+export type InterviewSessionRow = typeof interviewSessions.$inferSelect;
+export type InterviewQaRow = typeof interviewQa.$inferSelect;

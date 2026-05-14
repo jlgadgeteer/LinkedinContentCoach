@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
 import { ProviderCard } from "@/components/settings/provider-card";
 import { VoiceCard } from "@/components/settings/voice-card";
+import { KnowledgeCard } from "@/components/settings/knowledge-card";
 import { CorpusCard } from "@/components/settings/corpus-card";
 import { BackupCard } from "@/components/settings/backup-card";
 import { getSetupState } from "@/lib/setup";
@@ -56,6 +57,7 @@ export default async function SettingsPage() {
           lastVerifiedAt={snapshot.lastVerifiedAt}
         />
         <VoiceCard initial={snapshot.voiceProfileMarkdown} />
+        <KnowledgeCard initial={snapshot.knowledgeProfileMarkdown} />
         <CorpusCard
           postCount={snapshot.postCount}
           oldest={snapshot.postDateRange.oldest}

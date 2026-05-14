@@ -4,7 +4,7 @@
 
 import { createAnthropic } from "@ai-sdk/anthropic";
 import { createOpenAI } from "@ai-sdk/openai";
-import { streamText, type LanguageModel } from "ai";
+import { generateText, streamText, type LanguageModel } from "ai";
 import type { Provider } from "./types";
 
 export function getModel(args: {
@@ -50,4 +50,27 @@ export async function streamCompletion(args: {
         }
       : undefined,
   });
+}
+
+export async function generateOnce(args: {
+  provider: Provider;
+  model: string;
+  apiKey: string;
+  system: string;
+  user: string;
+  temperature?: number;
+  maxOutputTokens?: number;
+}): Promise<string> {
+  const model = getModel({
+    provider: args.provider,
+    model: args.model,
+    apiKey: args.apiKey,
+  });
+  const result = await generateText({
+    model,
+    system: args.system,
+    messages: [{ role: "user", content: args.user }],
+    temperature: args.temperature ?? 0.7,
+  });
+  return result.text;
 }
