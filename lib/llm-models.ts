@@ -1,5 +1,14 @@
 // Shared model catalogs for both the Provider card and the Per-action
 // parameters card. Pure data, safe to import from client components.
+//
+// IMPORTANT: We only list models that work via the OpenAI Chat Completions
+// endpoint (v1/chat/completions). OpenAI exposes some "pro" and reasoning
+// variants (gpt-5.5-pro, gpt-5.4-pro) only through the newer Responses API
+// (v1/responses) and the @ai-sdk/openai client we use defaults to chat
+// completions, so those models will return "not a chat model" errors and
+// are intentionally omitted. The "Custom model ID..." escape hatch lets
+// power users paste any ID; just be prepared for a Responses-only ID to
+// fail at Test connection time.
 
 import type { Provider } from "@/lib/types";
 
@@ -13,27 +22,22 @@ export const MODELS: Record<Provider, ModelChoice[]> = {
     { id: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5 (fast)" },
   ],
   openai: [
-    // Flagship (May 2026 — per developers.openai.com/api/docs/models).
-    { id: "gpt-5.5-pro", label: "GPT-5.5 pro (smartest, slowest)" },
+    // Chat-completions-compatible flagship line.
     { id: "gpt-5.5", label: "GPT-5.5 (recommended default)" },
-    // Lower-cost current generation.
-    { id: "gpt-5.4-pro", label: "GPT-5.4 pro (smarter than 5.4)" },
+    // Current cost-tier family.
     { id: "gpt-5.4", label: "GPT-5.4 (balanced)" },
     { id: "gpt-5.4-mini", label: "GPT-5.4 mini (faster, cheaper)" },
     { id: "gpt-5.4-nano", label: "GPT-5.4 nano (cheapest)" },
     // Previous flagship.
     { id: "gpt-5", label: "GPT-5 (previous flagship)" },
-    // Reasoning.
-    { id: "o3", label: "o3 (deep reasoning, legacy)" },
+    // Reasoning variants that go through chat completions.
+    { id: "o3", label: "o3 (deep reasoning)" },
     { id: "o4-mini", label: "o4-mini (cheaper reasoning)" },
     // Older GPT-4 family.
     { id: "gpt-4.1", label: "GPT-4.1 (legacy general)" },
     { id: "gpt-4.1-mini", label: "GPT-4.1 mini (legacy cheap)" },
     { id: "gpt-4o", label: "GPT-4o (older general)" },
     { id: "gpt-4o-mini", label: "GPT-4o mini (older cheap)" },
-    // Open-weight.
-    { id: "gpt-oss-120b", label: "gpt-oss-120b (open-weight)" },
-    { id: "gpt-oss-20b", label: "gpt-oss-20b (open-weight)" },
   ],
 };
 
