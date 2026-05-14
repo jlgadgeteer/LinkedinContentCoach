@@ -92,6 +92,35 @@ async function run(): Promise<void> {
     );
   `;
 
+  // PR 1: per-action LLM params live as JSON on config so we don't fan out into
+  // a wide column-per-action shape. Default {} means "use the built-in
+  // defaults" (0.8 for draft, 0.6 for others, no model override).
+  await sql`ALTER TABLE config ADD COLUMN IF NOT EXISTS action_settings jsonb NOT NULL DEFAULT '{}'::jsonb;`;
+
+  // PR 1: editable AI-tells / quality rules. Singleton like voice_profile.
+  await sql`
+    CREATE TABLE IF NOT EXISTS quality_rules (
+      id integer PRIMARY KEY DEFAULT 1,
+      markdown text NOT NULL DEFAULT '',
+      updated_at timestamptz NOT NULL DEFAULT now(),
+      CONSTRAINT quality_rules_singleton CHECK (id = 1)
+    );
+  `;
+
+  // PR 1: named writing modes are user-managed prompt presets the Draft action
+  // can opt into. position drives display order on the dropdown.
+  await sql`
+    CREATE TABLE IF NOT EXISTS writing_modes (
+      id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+      slug text NOT NULL UNIQUE,
+      name text NOT NULL,
+      markdown text NOT NULL DEFAULT '',
+      position integer NOT NULL DEFAULT 0,
+      created_at timestamptz NOT NULL DEFAULT now(),
+      updated_at timestamptz NOT NULL DEFAULT now()
+    );
+  `;
+
   // Interview Me: knowledge profile is a singleton like voice_profile, edited
   // by AI synthesis after each session and by the user directly in Settings.
   await sql`
@@ -136,6 +165,7 @@ async function run(): Promise<void> {
   await sql`CREATE INDEX IF NOT EXISTS recent_actions_at_idx ON recent_actions (at DESC);`;
   await sql`CREATE INDEX IF NOT EXISTS drafts_status_idx ON drafts (status);`;
   await sql`CREATE INDEX IF NOT EXISTS drafts_scheduled_for_idx ON drafts (scheduled_for);`;
+  await sql`CREATE INDEX IF NOT EXISTS writing_modes_position_idx ON writing_modes (position);`;
   await sql`CREATE INDEX IF NOT EXISTS interview_qa_session_idx ON interview_qa (session_id, position);`;
   await sql`CREATE INDEX IF NOT EXISTS interview_sessions_started_idx ON interview_sessions (started_at DESC);`;
 }
