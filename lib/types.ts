@@ -30,6 +30,10 @@ export type Post = {
   hook: string;
   text: string;
   wordCount: number;
+  reactions: number;
+  comments: number;
+  likes: number;
+  reposts: number;
   createdAt: number;
 };
 

@@ -52,6 +52,10 @@ export const posts = pgTable("posts", {
   hook: text("hook"),
   text: text("text").notNull(),
   wordCount: integer("word_count").notNull().default(0),
+  reactions: integer("reactions").notNull().default(0),
+  comments: integer("comments").notNull().default(0),
+  likes: integer("likes").notNull().default(0),
+  reposts: integer("reposts").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

@@ -67,7 +67,10 @@ export default async function SettingsPage() {
           hasApiKey={snapshot.hasApiKey}
           lastVerifiedAt={snapshot.lastVerifiedAt}
         />
-        <VoiceCard initial={snapshot.voiceProfileMarkdown} />
+        <VoiceCard
+          initial={snapshot.voiceProfileMarkdown}
+          postCount={snapshot.postCount}
+        />
         <KnowledgeCard initial={snapshot.knowledgeProfileMarkdown} />
         <QualityRulesCard initial={qualityRules} />
         <WritingModesCard
@@ -84,6 +87,9 @@ export default async function SettingsPage() {
           oldest={snapshot.postDateRange.oldest}
           newest={snapshot.postDateRange.newest}
           indexedAt={snapshot.postsCreatedAt}
+          postsWithReactions={snapshot.postsWithReactions}
+          topReactions={snapshot.topReactions}
+          avgReactions={snapshot.avgReactions}
         />
         <BackupCard />
       </div>

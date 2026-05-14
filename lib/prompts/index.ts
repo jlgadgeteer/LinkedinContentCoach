@@ -34,7 +34,12 @@ function formatPostCorpus(posts: Post[], limit = 30): string {
   // (top performers + recent), but for v1 recency is fine.
   const slice = posts.slice(0, limit);
   const formatted = slice.map((p, i) => {
-    return `### Post ${i + 1}\n**Date:** ${p.date}\n**Hook:** ${p.hook}\n${p.url ? `**URL:** ${p.url}\n` : ""}\n${p.text}`;
+    const stats: string[] = [];
+    if (p.reactions > 0) stats.push(`${p.reactions} reactions`);
+    if (p.comments > 0) stats.push(`${p.comments} comments`);
+    if (p.reposts > 0) stats.push(`${p.reposts} reposts`);
+    const statsLine = stats.length > 0 ? `\n**Engagement:** ${stats.join(", ")}` : "";
+    return `### Post ${i + 1}\n**Date:** ${p.date}\n**Hook:** ${p.hook}${statsLine}\n${p.url ? `**URL:** ${p.url}\n` : ""}\n${p.text}`;
   });
   const note = posts.length > limit ? `\n\n(${posts.length - limit} additional older posts available but not shown for brevity.)` : "";
   return formatted.join("\n\n---\n\n") + note;
