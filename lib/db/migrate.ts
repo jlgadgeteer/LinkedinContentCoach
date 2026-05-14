@@ -132,6 +132,14 @@ async function run(): Promise<void> {
     );
   `;
 
+  // PR 2: engagement columns on posts so voice extraction can weight by what
+  // performed and the workspace can surface a "best posts" view.
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS reactions integer NOT NULL DEFAULT 0;`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS comments integer NOT NULL DEFAULT 0;`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS likes integer NOT NULL DEFAULT 0;`;
+  await sql`ALTER TABLE posts ADD COLUMN IF NOT EXISTS reposts integer NOT NULL DEFAULT 0;`;
+  await sql`CREATE INDEX IF NOT EXISTS posts_reactions_idx ON posts (reactions DESC);`;
+
   await sql`CREATE INDEX IF NOT EXISTS posts_published_at_idx ON posts (published_at DESC);`;
   await sql`CREATE INDEX IF NOT EXISTS recent_actions_at_idx ON recent_actions (at DESC);`;
   await sql`CREATE INDEX IF NOT EXISTS drafts_status_idx ON drafts (status);`;
