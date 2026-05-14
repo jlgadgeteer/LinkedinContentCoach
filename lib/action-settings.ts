@@ -11,12 +11,22 @@ export { DEFAULT_TEMPERATURE };
 export type { ActionKey, ActionParams, ActionSettings };
 
 export async function getActionSettings(): Promise<ActionSettings> {
-  const res = await sql<{ action_settings: unknown }>`
-    SELECT action_settings FROM config WHERE id = 1 LIMIT 1
-  `;
-  const raw = res.rows[0]?.action_settings;
-  if (!raw || typeof raw !== "object") return {};
-  return raw as ActionSettings;
+  try {
+    const res = await sql<{ action_settings: unknown }>`
+      SELECT action_settings FROM config WHERE id = 1 LIMIT 1
+    `;
+    const raw = res.rows[0]?.action_settings;
+    if (!raw || typeof raw !== "object") return {};
+    return raw as ActionSettings;
+  } catch (err) {
+    const { isMissingRelationOrColumn } = await import("@/lib/db/safe-query");
+    if (isMissingRelationOrColumn(err)) {
+      // eslint-disable-next-line no-console
+      console.warn("[content-coach] config.action_settings missing; using defaults. Run /api/admin/migrate.");
+      return {};
+    }
+    throw err;
+  }
 }
 
 export async function setActionSettings(settings: ActionSettings): Promise<void> {

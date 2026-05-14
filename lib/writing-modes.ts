@@ -1,5 +1,6 @@
 import "server-only";
 import { sql } from "@vercel/postgres";
+import { safeQuery } from "@/lib/db/safe-query";
 
 export type WritingMode = {
   id: string;
@@ -10,34 +11,46 @@ export type WritingMode = {
 };
 
 export async function listWritingModes(): Promise<WritingMode[]> {
-  const rows = await sql<{
-    id: string;
-    slug: string;
-    name: string;
-    markdown: string;
-    position: number;
-  }>`
-    SELECT id::text, slug, name, markdown, position
-    FROM writing_modes
-    ORDER BY position ASC, name ASC
-  `;
-  return rows.rows;
+  return safeQuery(
+    async () => {
+      const rows = await sql<{
+        id: string;
+        slug: string;
+        name: string;
+        markdown: string;
+        position: number;
+      }>`
+        SELECT id::text, slug, name, markdown, position
+        FROM writing_modes
+        ORDER BY position ASC, name ASC
+      `;
+      return rows.rows;
+    },
+    [] as WritingMode[],
+    "writing_modes.list",
+  );
 }
 
 export async function getWritingModeBySlug(slug: string): Promise<WritingMode | null> {
-  const rows = await sql<{
-    id: string;
-    slug: string;
-    name: string;
-    markdown: string;
-    position: number;
-  }>`
-    SELECT id::text, slug, name, markdown, position
-    FROM writing_modes
-    WHERE slug = ${slug}
-    LIMIT 1
-  `;
-  return rows.rows[0] ?? null;
+  return safeQuery(
+    async () => {
+      const rows = await sql<{
+        id: string;
+        slug: string;
+        name: string;
+        markdown: string;
+        position: number;
+      }>`
+        SELECT id::text, slug, name, markdown, position
+        FROM writing_modes
+        WHERE slug = ${slug}
+        LIMIT 1
+      `;
+      return rows.rows[0] ?? null;
+    },
+    null,
+    "writing_modes.by_slug",
+  );
 }
 
 export async function createWritingMode(args: {
