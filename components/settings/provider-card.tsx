@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -29,7 +29,22 @@ function formatRelative(iso: string | null): string | null {
   return new Date(iso).toISOString().slice(0, 10);
 }
 
-export function ProviderCard({
+export function ProviderCard(props: {
+  provider: Provider | null;
+  model: string | null;
+  hasApiKey: boolean;
+  lastVerifiedAt: string | null;
+}) {
+  // The keyed inner ensures useState reinitializes whenever the server props
+  // change (e.g. after a successful save's revalidation). This fixes the
+  // "form silently reverts to Anthropic" report: on revalidation, the inner
+  // remounts with the freshly-saved provider, so state never drifts from
+  // what's actually in the DB after each action.
+  const k = `${props.provider ?? "anthropic"}|${props.model ?? ""}`;
+  return <ProviderCardInner key={k} {...props} />;
+}
+
+function ProviderCardInner({
   provider: initialProvider,
   model: initialModel,
   hasApiKey,
@@ -48,23 +63,6 @@ export function ProviderCard({
   const [model, setModel] = useState<string>(startingModel);
   const [isCustom, setIsCustom] = useState<boolean>(startingIsCustom);
 
-  // When the provider changes (user picking a different provider in the
-  // dropdown), reset the model to the first option of the new catalog. Without
-  // this, the model state can stay on the previous provider's ID, which both
-  // breaks the visible selection and submits the wrong model on save.
-  // We skip the first run so the initial server-side model isn't clobbered
-  // by the catalog's first entry on mount.
-  const isFirstProviderRunRef = useRef(true);
-  useEffect(() => {
-    if (isFirstProviderRunRef.current) {
-      isFirstProviderRunRef.current = false;
-      return;
-    }
-    const first = MODELS[provider][0]!.id;
-    setModel(first);
-    setIsCustom(false);
-  }, [provider]);
-
   const [saveState, saveAction, savePending] = useActionState(
     saveProviderSettingsAction,
     initial,
@@ -72,6 +70,14 @@ export function ProviderCard({
   const [testState, testAction, testPending] = useActionState(testProviderAction, initial);
 
   const verifiedRel = formatRelative(testState.ok ? new Date().toISOString() : lastVerifiedAt);
+
+  function handleProviderChange(next: Provider) {
+    setProvider(next);
+    // Cascade the model to the first option of the new provider's catalog
+    // so the Model select is never out of sync with the Provider select.
+    setModel(MODELS[next][0]!.id);
+    setIsCustom(false);
+  }
 
   return (
     <section className="settings-card" aria-labelledby="card-provider">
@@ -83,7 +89,9 @@ export function ProviderCard({
       </div>
       <p className="settings-card__desc">
         Bring your own key. We send a single test request to confirm it works, then encrypt it
-        with your AUTH_PASSWORD.
+        with your AUTH_PASSWORD. Models listed below all support the chat-completions endpoint;
+        for newer Responses-API-only models (e.g. <code>gpt-5.5-pro</code>) use Custom model ID
+        but expect the test to fail.
       </p>
 
       <form action={saveAction}>
@@ -91,10 +99,11 @@ export function ProviderCard({
           <div>
             <Label htmlFor="provider">Provider</Label>
             <Select
+              key={`provider-${provider}`}
               id="provider"
               name="provider"
               value={provider}
-              onChange={(e) => setProvider(e.target.value as Provider)}
+              onChange={(e) => handleProviderChange(e.target.value as Provider)}
             >
               <option value="anthropic">Anthropic</option>
               <option value="openai">OpenAI</option>
@@ -103,10 +112,7 @@ export function ProviderCard({
           <div>
             <Label htmlFor="model-select">Model</Label>
             <Select
-              // key forces a clean remount of the underlying <select> when the
-              // provider changes, so the browser never displays a stale label
-              // from the previous catalog.
-              key={`model-${provider}`}
+              key={`model-${provider}-${isCustom}`}
               id="model-select"
               value={isCustom ? CUSTOM : model}
               onChange={(e) => {
@@ -133,7 +139,7 @@ export function ProviderCard({
                   name="model"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
-                  placeholder={provider === "openai" ? "gpt-5.5-pro" : "claude-sonnet-4-7"}
+                  placeholder={provider === "openai" ? "gpt-5.5" : "claude-sonnet-4-7"}
                   autoComplete="off"
                   spellCheck={false}
                 />
