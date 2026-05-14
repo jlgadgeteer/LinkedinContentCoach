@@ -81,7 +81,11 @@ export default async function SettingsPage() {
             markdown: m.markdown,
           }))}
         />
-        <ActionSettingsCard initial={actionSettings} baseModel={snapshot.model} />
+        <ActionSettingsCard
+          initial={actionSettings}
+          baseModel={snapshot.model}
+          provider={snapshot.provider}
+        />
         <CorpusCard
           postCount={snapshot.postCount}
           oldest={snapshot.postDateRange.oldest}
