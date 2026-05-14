@@ -6,9 +6,8 @@ import { z } from "zod";
 import { sql } from "@vercel/postgres";
 import { auth } from "@/lib/auth";
 
-export type DraftActionState = { error: string | null; ok: string | null };
-
-const initial: DraftActionState = { error: null, ok: null };
+import type { DraftActionState } from "@/lib/card-state";
+export type { DraftActionState };
 
 async function requireUser(): Promise<void> {
   const session = await auth();
@@ -136,4 +135,3 @@ export async function deleteDraftAction(formData: FormData): Promise<void> {
   redirect("/drafts");
 }
 
-export { initial as initialDraftActionState };

@@ -8,10 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   createWritingModeAction,
   deleteWritingModeAction,
-  initialCardState,
   updateWritingModeAction,
-  type CardState,
 } from "@/lib/quality-actions";
+import { initialCardState, type CardState } from "@/lib/card-state";
 
 export type ModeRow = {
   id: string;

@@ -6,9 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   saveQualityRulesAction,
   resetQualityRulesAction,
-  initialCardState,
-  type CardState,
 } from "@/lib/quality-actions";
+import { initialCardState, type CardState } from "@/lib/card-state";
 
 const initial: CardState = initialCardState;
 

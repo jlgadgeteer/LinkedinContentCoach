@@ -13,8 +13,8 @@ import {
   setDraftScheduleAction,
   updateDraftBodyAction,
   updateDraftStatusAction,
-  initialDraftActionState,
 } from "@/lib/drafts-actions";
+import { initialDraftActionState } from "@/lib/card-state";
 import type { DraftStatus } from "@/lib/db/schema";
 
 function isoToLocalInput(iso: string | null): string {
