@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { DIMENSIONS, DIMENSION_LABEL, type Dimension } from "@/lib/interview";
+import { DIMENSIONS, DIMENSION_LABEL, type Dimension } from "@/lib/interview-shared";
 
 type Qa = {
   qaId: string;
