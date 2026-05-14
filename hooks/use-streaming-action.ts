@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export type ActionKind = "draft" | "ideate" | "search" | "check";
+export type ActionKind = "draft" | "ideate" | "search" | "check" | "revise";
 
 export type ActionPayload = {
   action: ActionKind;
@@ -10,6 +10,8 @@ export type ActionPayload = {
   draft?: string;
   query?: string;
   mode?: string;
+  original?: string;
+  instruction?: string;
 };
 
 export type StreamStatus = "idle" | "streaming" | "done" | "fail";

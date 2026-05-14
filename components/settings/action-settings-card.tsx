@@ -20,9 +20,10 @@ const ACTION_LABEL: Record<ActionKey, string> = {
   ideate: "Ideate",
   search: "Search",
   check: "Quality check",
+  revise: "Revise",
 };
 
-const ACTION_KEYS: ActionKey[] = ["draft", "ideate", "search", "check"];
+const ACTION_KEYS: ActionKey[] = ["draft", "revise", "ideate", "search", "check"];
 
 export function ActionSettingsCard({
   initial,

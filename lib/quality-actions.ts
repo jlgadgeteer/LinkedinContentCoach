@@ -104,7 +104,7 @@ export async function deleteWritingModeAction(formData: FormData): Promise<void>
   redirect("/settings");
 }
 
-const ACTION_KEYS: ActionKey[] = ["draft", "ideate", "search", "check"];
+const ACTION_KEYS: ActionKey[] = ["draft", "revise", "ideate", "search", "check"];
 
 export async function saveActionSettingsAction(
   _prev: CardState,

@@ -1,6 +1,6 @@
 // Shared types used across client and server.
 
-export type Action = "draft" | "ideate" | "search" | "check";
+export type Action = "draft" | "ideate" | "search" | "check" | "revise";
 
 export type Provider = "anthropic" | "openai";
 

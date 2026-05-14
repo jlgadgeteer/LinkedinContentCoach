@@ -40,6 +40,7 @@ export function DraftView({
         return mode ? { topic: topic.trim(), mode } : { topic: topic.trim() };
       }}
       formatPosts
+      supportsRevision
     >
       {modes.length > 0 ? (
         <div>

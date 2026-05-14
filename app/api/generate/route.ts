@@ -18,11 +18,13 @@ export const runtime = "edge";
 const { auth } = NextAuth(authConfig);
 
 const RequestSchema = z.object({
-  action: z.enum(["draft", "ideate", "search", "check"]),
+  action: z.enum(["draft", "ideate", "search", "check", "revise"]),
   topic: z.string().optional(),
   draft: z.string().optional(),
   query: z.string().optional(),
   mode: z.string().optional(),
+  original: z.string().optional(),
+  instruction: z.string().optional(),
 });
 
 const KIND_BY_ACTION = {
@@ -30,6 +32,7 @@ const KIND_BY_ACTION = {
   ideate: "IDEATE",
   search: "SEARCH",
   check: "QC",
+  revise: "DRAFT",
 } as const;
 
 function titleFor(action: keyof typeof KIND_BY_ACTION, input: string): string {
@@ -41,6 +44,7 @@ function titleFor(action: keyof typeof KIND_BY_ACTION, input: string): string {
     ideate: "Ideation",
     search: "Search",
     check: "Quality check",
+    revise: "Revised draft",
   }[action];
 }
 
@@ -82,25 +86,30 @@ export async function POST(req: Request) {
     );
   }
 
-  const { action, topic, draft, query, mode } = parsed.data;
+  const { action, topic, draft, query, mode, original, instruction } = parsed.data;
 
   const [voiceProfile, posts, knowledge, qualityRules, actionSettings, writingMode] =
     await Promise.all([
       getVoiceProfileMarkdown(),
       getPostsForPrompt(),
       getKnowledgeMarkdown(),
-      action === "draft" || action === "check"
+      action === "draft" || action === "check" || action === "revise"
         ? getQualityRulesMarkdown()
         : Promise.resolve(""),
       getActionSettings(),
       action === "draft" && mode ? getWritingModeBySlug(mode) : Promise.resolve(null),
     ]);
 
-  const inputForTitle = topic ?? query ?? draft ?? "";
+  const inputForTitle =
+    action === "revise" ? instruction ?? "" : topic ?? query ?? draft ?? "";
   const recentTitle = titleFor(action, inputForTitle);
 
   // Persist the input up front so the workspace can show the row even if the
   // stream fails mid-flight. The output column gets filled in by onFinish.
+  // Revisions store the instruction in input_topic and the original in
+  // input_draft so the recent viewer can replay both.
+  const persistTopic = action === "revise" ? instruction : topic;
+  const persistDraft = action === "revise" ? original : draft;
   const inserted = await sql<{ id: number }>`
     INSERT INTO recent_actions (
       kind, title, action, input_topic, input_draft, input_query
@@ -109,8 +118,8 @@ export async function POST(req: Request) {
       ${KIND_BY_ACTION[action]},
       ${recentTitle},
       ${action},
-      ${topic ?? null},
-      ${draft ?? null},
+      ${persistTopic ?? null},
+      ${persistDraft ?? null},
       ${query ?? null}
     )
     RETURNING id
@@ -127,7 +136,7 @@ export async function POST(req: Request) {
       ? { name: writingMode.name, markdown: writingMode.markdown }
       : null,
   });
-  const user = buildUserMessage({ action, topic, draft, query });
+  const user = buildUserMessage({ action, topic, draft, query, original, instruction });
 
   const params = resolveActionParams(actionSettings, action, provider.model);
 
@@ -141,7 +150,7 @@ export async function POST(req: Request) {
       temperature: params.temperature,
       onFinish: async ({ text }) => {
         try {
-          if (action === "draft" && text.trim()) {
+          if ((action === "draft" || action === "revise") && text.trim()) {
             const postBody = extractPostBody(text);
             const draftTitle = titleFromBody(postBody, recentTitle);
             const created = await sql<{ id: string }>`

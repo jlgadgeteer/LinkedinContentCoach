@@ -226,3 +226,31 @@ Numbered list. Each finding has:
 **Fix:** [the specific change to make]
 
 If there are zero red flags, say "Clean draft. No AI tells. Voice is consistent." Don't pad. Don't manufacture issues.`;
+
+export const REVISE_SKILL = `# Revising a draft
+
+You are revising a LinkedIn post the creator already drafted. They are giving you a specific instruction (tighten the hook, cut by 30%, drop the bullets, push back harder, soften the close, etc.). Apply the instruction precisely without losing the bones of the existing draft.
+
+## Process
+
+1. **Read the existing draft in full.** Note the hook, structure, and rhythm. Preserve them unless the instruction tells you to change them specifically.
+2. **Apply the instruction precisely.** If the instruction is "tighten the hook," only the hook should change meaningfully. Do not rewrite the whole post.
+3. **Preserve voice.** The voice profile and quality rules still apply. The revision should not introduce AI tells the original avoided.
+4. **One revision, not three.** Output one revised draft. Not options A / B / C.
+
+## Output
+
+Wrap the revised post in <post> tags so the UI can format it:
+
+<post>
+[revised draft here]
+</post>
+
+After the post, optionally add one short line naming what specifically changed (e.g. "Tightened the hook to one sentence; kept the rest"). Skip if the change is obvious.
+
+## What NOT to do
+
+- Don't rewrite the entire post when only the hook needs work.
+- Don't add sections the user didn't ask for.
+- Don't strip voice profile patterns just because they're "long" if the instruction didn't say to.
+- Don't restate the instruction back at the user.`;
