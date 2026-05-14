@@ -95,6 +95,90 @@ export function BackupCard() {
           </Button>
         </div>
       </div>
+
+      <MigrateRow />
     </section>
+  );
+}
+
+function MigrateRow() {
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<
+    | { kind: "ok"; message: string }
+    | { kind: "warn"; message: string; failures: { statement: string; error: string }[] }
+    | { kind: "error"; message: string }
+    | null
+  >(null);
+
+  async function run() {
+    if (busy) return;
+    setBusy(true);
+    setResult(null);
+    try {
+      const res = await fetch("/api/admin/migrate", { method: "POST" });
+      const body = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        message?: string;
+        error?: string;
+        failures?: { statement: string; error: string }[];
+      };
+      if (!res.ok) {
+        setResult({ kind: "error", message: body.error ?? `HTTP ${res.status}` });
+      } else if (body.failures && body.failures.length > 0) {
+        setResult({
+          kind: "warn",
+          message: body.message ?? `${body.failures.length} statement(s) failed.`,
+          failures: body.failures,
+        });
+      } else {
+        setResult({ kind: "ok", message: body.message ?? "Schema is up to date." });
+      }
+    } catch (err) {
+      setResult({ kind: "error", message: err instanceof Error ? err.message : "Network error" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div style={{ marginTop: 18, paddingTop: 18, borderTop: "1px solid var(--color-border)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <span className="eyebrow">Schema check</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          type="button"
+          onClick={run}
+          streaming={busy}
+          streamingLabel="Checking"
+        >
+          Run schema check
+        </Button>
+      </div>
+      <p className="muted" style={{ marginTop: 8, fontSize: 12.5, lineHeight: 1.55 }}>
+        Re-applies the idempotent migration. Safe to run any time. Useful if a feature card is
+        empty when it shouldn't be, or if you see a 500 after a deploy.
+      </p>
+      {result?.kind === "ok" ? (
+        <p style={{ fontSize: 13, color: "var(--color-success)", marginTop: 8 }}>{result.message}</p>
+      ) : null}
+      {result?.kind === "warn" ? (
+        <div style={{ marginTop: 8 }}>
+          <p style={{ fontSize: 13, color: "var(--color-danger)" }}>{result.message}</p>
+          <ul style={{ margin: "8px 0 0 16px", fontSize: 12, color: "var(--color-fg-muted)" }}>
+            {result.failures.map((f, i) => (
+              <li key={i}>
+                <span className="mono">{f.statement}</span>: {f.error}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {result?.kind === "error" ? (
+        <p role="alert" style={{ fontSize: 13, color: "var(--color-danger)", marginTop: 8 }}>
+          {result.message}
+        </p>
+      ) : null}
+    </div>
   );
 }

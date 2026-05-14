@@ -1,5 +1,6 @@
 import "server-only";
 import { sql } from "@vercel/postgres";
+import { isMissingRelationOrColumn } from "@/lib/db/safe-query";
 
 /**
  * The default quality-rules markdown shipped with the app. Used to seed the
@@ -50,21 +51,30 @@ These are AI tells. Every one is a fail.
 `;
 
 export async function getQualityRulesMarkdown(): Promise<string> {
-  const res = await sql<{ markdown: string }>`
-    SELECT markdown FROM quality_rules WHERE id = 1 LIMIT 1
-  `;
-  const md = res.rows[0]?.markdown;
-  if (md && md.trim().length > 0) return md;
-  // No row, or empty row. Seed once with the defaults so editing is friendly.
-  await sql`
-    INSERT INTO quality_rules (id, markdown, updated_at)
-    VALUES (1, ${DEFAULT_QUALITY_RULES}, now())
-    ON CONFLICT (id) DO UPDATE
-      SET markdown = CASE WHEN length(quality_rules.markdown) = 0
-                          THEN EXCLUDED.markdown
-                          ELSE quality_rules.markdown END
-  `;
-  return DEFAULT_QUALITY_RULES;
+  try {
+    const res = await sql<{ markdown: string }>`
+      SELECT markdown FROM quality_rules WHERE id = 1 LIMIT 1
+    `;
+    const md = res.rows[0]?.markdown;
+    if (md && md.trim().length > 0) return md;
+    // No row, or empty row. Seed once with the defaults so editing is friendly.
+    await sql`
+      INSERT INTO quality_rules (id, markdown, updated_at)
+      VALUES (1, ${DEFAULT_QUALITY_RULES}, now())
+      ON CONFLICT (id) DO UPDATE
+        SET markdown = CASE WHEN length(quality_rules.markdown) = 0
+                            THEN EXCLUDED.markdown
+                            ELSE quality_rules.markdown END
+    `;
+    return DEFAULT_QUALITY_RULES;
+  } catch (err) {
+    if (isMissingRelationOrColumn(err)) {
+      // eslint-disable-next-line no-console
+      console.warn("[content-coach] quality_rules missing; falling back to defaults. Run /api/admin/migrate.");
+      return DEFAULT_QUALITY_RULES;
+    }
+    throw err;
+  }
 }
 
 export async function setQualityRulesMarkdown(markdown: string): Promise<void> {

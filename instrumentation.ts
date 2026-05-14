@@ -19,8 +19,16 @@ export async function register() {
 
   try {
     const { ensureSchema } = await import("@/lib/db/migrate");
-    await ensureSchema();
+    const failures = await ensureSchema();
+    if (failures.length > 0) {
+      console.warn(
+        `[content-coach] ${failures.length} migration statement(s) failed; ` +
+          "the app will continue with defaults where possible. " +
+          "Hit POST /api/admin/migrate to retry.",
+        failures,
+      );
+    }
   } catch (err) {
-    console.error("[content-coach] ensureSchema failed", err);
+    console.error("[content-coach] ensureSchema crashed", err);
   }
 }
