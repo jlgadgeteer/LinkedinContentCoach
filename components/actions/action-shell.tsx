@@ -24,6 +24,7 @@ type Props = {
     topic?: string;
     draft?: string;
     query?: string;
+    mode?: string;
   } | null;
   /** Primary button label when idle. */
   primaryLabel: string;

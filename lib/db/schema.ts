@@ -5,6 +5,7 @@ import {
   serial,
   timestamp,
   uuid,
+  jsonb,
   check,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -23,6 +24,7 @@ export const config = pgTable(
     encryptedApiKey: text("encrypted_api_key"),
     setupCompletedAt: timestamp("setup_completed_at", { withTimezone: true }),
     lastVerifiedAt: timestamp("last_verified_at", { withTimezone: true }),
+    actionSettings: jsonb("action_settings").notNull().default({}),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => ({
@@ -95,6 +97,28 @@ export const drafts = pgTable(
 
 export type DraftStatus = "not_published" | "scheduled" | "published";
 
+export const qualityRules = pgTable(
+  "quality_rules",
+  {
+    id: integer("id").primaryKey().default(1),
+    markdown: text("markdown").notNull().default(""),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    singleton: check("quality_rules_singleton", sql`${t.id} = 1`),
+  }),
+);
+
+export const writingModes = pgTable("writing_modes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  slug: text("slug").notNull().unique(),
+  name: text("name").notNull(),
+  markdown: text("markdown").notNull().default(""),
+  position: integer("position").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 export type Config = typeof config.$inferSelect;
 export type NewConfig = typeof config.$inferInsert;
 export type VoiceProfileRow = typeof voiceProfile.$inferSelect;
@@ -105,3 +129,5 @@ export type RecentActionRow = typeof recentActions.$inferSelect;
 export type NewRecentAction = typeof recentActions.$inferInsert;
 export type DraftRow = typeof drafts.$inferSelect;
 export type NewDraft = typeof drafts.$inferInsert;
+export type QualityRulesRow = typeof qualityRules.$inferSelect;
+export type WritingModeRow = typeof writingModes.$inferSelect;

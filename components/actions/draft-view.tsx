@@ -3,16 +3,24 @@
 import { useState } from "react";
 import { ActionShell } from "@/components/actions/action-shell";
 import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+
+export type DraftMode = { slug: string; name: string };
 
 export function DraftView({
   defaultTopic,
   postCount,
+  modes = [],
+  defaultMode,
 }: {
   defaultTopic?: string;
   postCount: number;
+  modes?: DraftMode[];
+  defaultMode?: string;
 }) {
   const [topic, setTopic] = useState<string>(defaultTopic ?? "");
+  const [mode, setMode] = useState<string>(defaultMode ?? "");
 
   return (
     <ActionShell
@@ -27,9 +35,31 @@ export function DraftView({
       primaryLabel="Draft"
       primaryStreamingLabel="Drafting"
       canSubmit={topic.trim().length > 0}
-      buildPayload={() => (topic.trim() ? { topic: topic.trim() } : null)}
+      buildPayload={() => {
+        if (!topic.trim()) return null;
+        return mode ? { topic: topic.trim(), mode } : { topic: topic.trim() };
+      }}
       formatPosts
     >
+      {modes.length > 0 ? (
+        <div>
+          <Label htmlFor="mode" hint="Optional. Picks a saved prompt preset.">
+            Writing mode
+          </Label>
+          <Select
+            id="mode"
+            value={mode}
+            onChange={(e) => setMode(e.target.value)}
+          >
+            <option value="">Default (voice profile only)</option>
+            {modes.map((m) => (
+              <option key={m.slug} value={m.slug}>
+                {m.name}
+              </option>
+            ))}
+          </Select>
+        </div>
+      ) : null}
       <div>
         <Label htmlFor="topic">Topic</Label>
         <Textarea

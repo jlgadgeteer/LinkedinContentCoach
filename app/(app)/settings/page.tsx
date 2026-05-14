@@ -5,8 +5,14 @@ import { ProviderCard } from "@/components/settings/provider-card";
 import { VoiceCard } from "@/components/settings/voice-card";
 import { CorpusCard } from "@/components/settings/corpus-card";
 import { BackupCard } from "@/components/settings/backup-card";
+import { QualityRulesCard } from "@/components/settings/quality-rules-card";
+import { WritingModesCard } from "@/components/settings/writing-modes-card";
+import { ActionSettingsCard } from "@/components/settings/action-settings-card";
 import { getSetupState } from "@/lib/setup";
 import { getSettingsSnapshot } from "@/lib/settings";
+import { getQualityRulesMarkdown } from "@/lib/quality-rules";
+import { listWritingModes } from "@/lib/writing-modes";
+import { getActionSettings } from "@/lib/action-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +43,12 @@ export default async function SettingsPage() {
   const setup = await getSetupState();
   if (!setup.isComplete) redirect("/setup");
 
-  const snapshot = await getSettingsSnapshot();
+  const [snapshot, qualityRules, modes, actionSettings] = await Promise.all([
+    getSettingsSnapshot(),
+    getQualityRulesMarkdown(),
+    listWritingModes(),
+    getActionSettings(),
+  ]);
   const lastSaved = relative(snapshot.lastSavedAt);
 
   return (
@@ -56,6 +67,16 @@ export default async function SettingsPage() {
           lastVerifiedAt={snapshot.lastVerifiedAt}
         />
         <VoiceCard initial={snapshot.voiceProfileMarkdown} />
+        <QualityRulesCard initial={qualityRules} />
+        <WritingModesCard
+          modes={modes.map((m) => ({
+            id: m.id,
+            slug: m.slug,
+            name: m.name,
+            markdown: m.markdown,
+          }))}
+        />
+        <ActionSettingsCard initial={actionSettings} baseModel={snapshot.model} />
         <CorpusCard
           postCount={snapshot.postCount}
           oldest={snapshot.postDateRange.oldest}

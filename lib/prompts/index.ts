@@ -44,12 +44,14 @@ export function buildSystemPrompt(args: {
   action: Action;
   voiceProfile: string;
   posts: Post[];
+  qualityRules?: string;
+  writingMode?: { name: string; markdown: string } | null;
 }): string {
   const voiceBlock = args.voiceProfile.trim().length > 0
     ? args.voiceProfile.trim()
     : "(No voice profile loaded. Use sensible LinkedIn defaults and ask the creator to fill in their voice profile in Settings.)";
 
-  return [
+  const sections: string[] = [
     SYSTEM_BASE,
     "",
     "## Skill: " + args.action,
@@ -59,11 +61,39 @@ export function buildSystemPrompt(args: {
     "## Voice profile",
     "",
     voiceBlock,
-    "",
-    "## Post corpus",
-    "",
-    formatPostCorpus(args.posts),
-  ].join("\n");
+  ];
+
+  // Inject the user's editable quality rules into both Draft (so the model
+  // avoids these patterns up front) and Check (so it grades against them).
+  // Skip for Ideate / Search where the rules don't apply.
+  if (
+    (args.action === "draft" || args.action === "check") &&
+    args.qualityRules &&
+    args.qualityRules.trim().length > 0
+  ) {
+    sections.push(
+      "",
+      "## Quality rules",
+      "",
+      "These are user-editable. They override your defaults. Treat as authoritative for what to avoid (Draft) or grade against (Check).",
+      "",
+      args.qualityRules.trim(),
+    );
+  }
+
+  if (args.action === "draft" && args.writingMode && args.writingMode.markdown.trim().length > 0) {
+    sections.push(
+      "",
+      "## Writing mode: " + args.writingMode.name,
+      "",
+      "The user picked this mode for this draft. Apply it on top of the voice profile; the mode wins on structural and stylistic choices that conflict.",
+      "",
+      args.writingMode.markdown.trim(),
+    );
+  }
+
+  sections.push("", "## Post corpus", "", formatPostCorpus(args.posts));
+  return sections.join("\n");
 }
 
 export function buildUserMessage(args: {
