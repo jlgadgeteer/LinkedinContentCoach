@@ -19,8 +19,8 @@ import {
   type ActionSettings,
 } from "@/lib/action-settings";
 
-export type CardState = { error: string | null; ok: string | null };
-const initial: CardState = { error: null, ok: null };
+import type { CardState } from "@/lib/card-state";
+export type { CardState };
 
 async function requireUser(): Promise<void> {
   const sess = await auth();
@@ -176,4 +176,3 @@ export async function saveActionSettingsAction(
   }
 }
 
-export { initial as initialCardState };

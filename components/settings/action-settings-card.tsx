@@ -5,11 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/ui/select";
-import {
-  initialCardState,
-  saveActionSettingsAction,
-  type CardState,
-} from "@/lib/quality-actions";
+import { saveActionSettingsAction } from "@/lib/quality-actions";
+import { initialCardState, type CardState } from "@/lib/card-state";
 import {
   DEFAULT_TEMPERATURE,
   type ActionKey,
