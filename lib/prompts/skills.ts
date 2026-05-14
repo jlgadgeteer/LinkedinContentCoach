@@ -90,6 +90,50 @@ If the user is checking before drafting, include an explicit overlap risk assess
 - **Partial overlap:** "You've touched this twice but from different angles. A new post is fine if you find a fresh angle."
 - **No real overlap:** "You haven't covered this. Green light."`;
 
+export const VOICE_EXTRACTION_SKILL = `# Extracting a voice profile from a creator's posts
+
+You are reading a sample of this creator's LinkedIn posts (a mix of their highest-engagement posts and their most recent posts) and producing a voice profile they can use as the authoritative reference for future drafts.
+
+## What goes in a voice profile
+
+The profile is markdown. Sections in this order:
+
+## Tone and register
+Two or three sentences. What is their default register? Direct vs hedged. Warm vs detached. Confident vs deferential. Quote a representative line if it helps.
+
+## Sentence and paragraph rhythm
+Average sentence length, paragraph length, use of one-line breaks for emphasis. If they vary it deliberately, name when.
+
+## Hook patterns
+Bullet list of the actual opening patterns you see them use across the sample. Examples: "specific number + counter-intuitive claim", "a single question", "a four-word declarative". Quote two or three real openers from the sample.
+
+## Structural moves
+Bullet list of recurring structural choices. Examples: "always closes with a one-line takeaway", "uses '/' for parallel choices", "drops a specific name in paragraph two".
+
+## Vocabulary cues
+Bullet list. Words and phrases they actually use that signal their voice. Also a short list of words you do NOT see them use that an LLM might default to.
+
+## Banned phrases
+Bullet list of phrases that would feel out of voice if a draft included them. Combine LLM cliches with anything you see them deliberately avoiding.
+
+## Audience cues
+One or two sentences inferring who they are writing to and what those readers care about, based on the posts.
+
+## Things to keep doing
+Three to five bullets. Patterns the model should preserve.
+
+## Process
+
+1. Read every post in the sample carefully. Bias toward what's distinctive.
+2. Distinguish "voice" (how they write) from "topics" (what they write about). The voice profile is voice. Topics belong elsewhere.
+3. Quote selectively. A few short quotes ground the profile; do not paste full posts.
+4. If something appears in only one or two posts, do not over-generalize. Mark it as "sometimes" or omit it.
+5. Be opinionated. A profile that says "varies" is useless. If the writer is inconsistent, name a default plus the exceptions.
+
+## Output
+
+Emit ONLY the voice profile markdown. No preamble, no commentary, no closing. Start with the first H2 ("## Tone and register") and end with the last bullet of the last section.`;
+
 export const INTERVIEW_QUESTION_SKILL = `# Interviewing the creator
 
 You are interviewing a senior professional to capture their voice, point of view, and the knowledge they bring to LinkedIn writing. Each session produces ONE question at a time. The user answers, then you generate the next.
@@ -170,49 +214,9 @@ If the session has too few answers to meaningfully update either document (fewer
 
 export const CHECK_SKILL = `# Quality-checking a LinkedIn post
 
-Scan the draft against the rules in the voice profile and the patterns below. Return findings as a short list followed by specific fixes. Do not show scores or grades.
+Scan the draft against the voice profile and the quality rules section below (which is user-editable). Return findings as a short list followed by specific fixes. Do not show scores or grades.
 
-## Red flags (must fix)
-
-These are AI tells. Every one is a fail:
-
-**Punctuation and structure:**
-- Em dashes (any em dash)
-- Three-part parallel constructions ("It's not X. It's Y. It's Z.")
-- Bolded phrases mid-sentence for emphasis
-- Recap paragraphs at the end
-
-**Openers:**
-- "In today's fast-paced world..."
-- "In the age of AI..."
-- "Let's dive in..."
-- "Here's the thing..."
-- "The truth is..."
-- "Make no mistake..."
-
-**LinkedIn cliches:**
-- Game-changer, synergy, leverage (as verb), deep dive, circle back, move the needle, unlock value, paradigm shift, North Star, 10x, low-hanging fruit, at the end of the day, drive outcomes, mission-critical
-
-**AI-tell vocabulary:**
-- Delve, myriad, tapestry, navigate (as verb), harness (as verb), robust (when "strong" would do), comprehensive (filler), seamless, cutting-edge, state-of-the-art, revolutionary
-
-**Closing patterns:**
-- "What are your thoughts?"
-- "Let me know in the comments."
-- "DM me if interested."
-- "Follow for more."
-- "I'm humbled..."
-
-## Yellow flags (review)
-
-- More than 2 emojis (default zero unless voice profile says otherwise).
-- Any hashtag unless explicitly requested.
-- Bullets in groups of exactly three.
-- Sentences over 25 words.
-- Paragraphs over 4 sentences.
-- A "P.S." or "Bonus tip" section.
-- Hook that takes more than 2 lines to land.
-- "Not just X, but Y" construction.
+The quality rules section enumerates AI tells, banned vocabulary, and structural anti-patterns. Treat every red flag as a fail and every yellow flag as something to surface for human review.
 
 ## Output format
 

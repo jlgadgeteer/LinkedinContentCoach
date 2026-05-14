@@ -42,7 +42,12 @@ function formatPostCorpus(posts: Post[], limit = 30): string {
   // (top performers + recent), but for v1 recency is fine.
   const slice = posts.slice(0, limit);
   const formatted = slice.map((p, i) => {
-    return `### Post ${i + 1}\n**Date:** ${p.date}\n**Hook:** ${p.hook}\n${p.url ? `**URL:** ${p.url}\n` : ""}\n${p.text}`;
+    const stats: string[] = [];
+    if (p.reactions > 0) stats.push(`${p.reactions} reactions`);
+    if (p.comments > 0) stats.push(`${p.comments} comments`);
+    if (p.reposts > 0) stats.push(`${p.reposts} reposts`);
+    const statsLine = stats.length > 0 ? `\n**Engagement:** ${stats.join(", ")}` : "";
+    return `### Post ${i + 1}\n**Date:** ${p.date}\n**Hook:** ${p.hook}${statsLine}\n${p.url ? `**URL:** ${p.url}\n` : ""}\n${p.text}`;
   });
   const note = posts.length > limit ? `\n\n(${posts.length - limit} additional older posts available but not shown for brevity.)` : "";
   return formatted.join("\n\n---\n\n") + note;
@@ -53,6 +58,8 @@ export function buildSystemPrompt(args: {
   voiceProfile: string;
   posts: Post[];
   knowledge?: string;
+  qualityRules?: string;
+  writingMode?: { name: string; markdown: string } | null;
 }): string {
   const voiceBlock = args.voiceProfile.trim().length > 0
     ? args.voiceProfile.trim()
@@ -82,6 +89,35 @@ export function buildSystemPrompt(args: {
       "These are the topics this creator owns, the opinions they hold, and the audience they write for. Treat as authoritative for what to write about; voice profile remains authoritative for how.",
       "",
       knowledgeBlock,
+    );
+  }
+
+  // Inject the user's editable quality rules into both Draft (so the model
+  // avoids these patterns up front) and Check (so it grades against them).
+  // Skip for Ideate / Search where the rules don't apply.
+  if (
+    (args.action === "draft" || args.action === "check") &&
+    args.qualityRules &&
+    args.qualityRules.trim().length > 0
+  ) {
+    sections.push(
+      "",
+      "## Quality rules",
+      "",
+      "These are user-editable. They override your defaults. Treat as authoritative for what to avoid (Draft) or grade against (Check).",
+      "",
+      args.qualityRules.trim(),
+    );
+  }
+
+  if (args.action === "draft" && args.writingMode && args.writingMode.markdown.trim().length > 0) {
+    sections.push(
+      "",
+      "## Writing mode: " + args.writingMode.name,
+      "",
+      "The user picked this mode for this draft. Apply it on top of the voice profile; the mode wins on structural and stylistic choices that conflict.",
+      "",
+      args.writingMode.markdown.trim(),
     );
   }
 

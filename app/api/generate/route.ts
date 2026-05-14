@@ -8,6 +8,9 @@ import { getPostsForPrompt, getVoiceProfileMarkdown } from "@/lib/posts";
 import { getKnowledgeMarkdown } from "@/lib/knowledge";
 import { buildSystemPrompt, buildUserMessage } from "@/lib/prompts";
 import { extractPostBody, titleFromBody } from "@/lib/drafts";
+import { getQualityRulesMarkdown } from "@/lib/quality-rules";
+import { getWritingModeBySlug } from "@/lib/writing-modes";
+import { getActionSettings, resolveActionParams } from "@/lib/action-settings";
 
 // ADR-006: edge runtime for streaming.
 export const runtime = "edge";
@@ -19,6 +22,7 @@ const RequestSchema = z.object({
   topic: z.string().optional(),
   draft: z.string().optional(),
   query: z.string().optional(),
+  mode: z.string().optional(),
   original: z.string().optional(),
   instruction: z.string().optional(),
 });
@@ -82,13 +86,19 @@ export async function POST(req: Request) {
     );
   }
 
-  const [voiceProfile, posts, knowledge] = await Promise.all([
-    getVoiceProfileMarkdown(),
-    getPostsForPrompt(),
-    getKnowledgeMarkdown(),
-  ]);
+  const { action, topic, draft, query, mode, original, instruction } = parsed.data;
 
-  const { action, topic, draft, query, original, instruction } = parsed.data;
+  const [voiceProfile, posts, knowledge, qualityRules, actionSettings, writingMode] =
+    await Promise.all([
+      getVoiceProfileMarkdown(),
+      getPostsForPrompt(),
+      getKnowledgeMarkdown(),
+      action === "draft" || action === "check" || action === "revise"
+        ? getQualityRulesMarkdown()
+        : Promise.resolve(""),
+      getActionSettings(),
+      action === "draft" && mode ? getWritingModeBySlug(mode) : Promise.resolve(null),
+    ]);
 
   const inputForTitle =
     action === "revise" ? instruction ?? "" : topic ?? query ?? draft ?? "";
@@ -116,17 +126,28 @@ export async function POST(req: Request) {
   `;
   const recentId = inserted.rows[0]!.id;
 
-  const system = buildSystemPrompt({ action, voiceProfile, posts, knowledge });
+  const system = buildSystemPrompt({
+    action,
+    voiceProfile,
+    posts,
+    knowledge,
+    qualityRules,
+    writingMode: writingMode
+      ? { name: writingMode.name, markdown: writingMode.markdown }
+      : null,
+  });
   const user = buildUserMessage({ action, topic, draft, query, original, instruction });
+
+  const params = resolveActionParams(actionSettings, action, provider.model);
 
   try {
     const result = await streamCompletion({
       provider: provider.provider,
-      model: provider.model,
+      model: params.model,
       apiKey: provider.apiKey,
       system,
       user,
-      temperature: action === "draft" || action === "revise" ? 0.8 : 0.6,
+      temperature: params.temperature,
       onFinish: async ({ text }) => {
         try {
           if ((action === "draft" || action === "revise") && text.trim()) {

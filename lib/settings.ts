@@ -13,6 +13,9 @@ export type SettingsSnapshot = {
   postCount: number;
   postDateRange: { oldest: string | null; newest: string | null };
   postsCreatedAt: string | null;
+  postsWithReactions: number;
+  topReactions: number;
+  avgReactions: number | null;
   lastSavedAt: string | null;
 };
 
@@ -40,12 +43,18 @@ export async function getSettingsSnapshot(): Promise<SettingsSnapshot> {
     oldest: string | null;
     newest: string | null;
     latest_created: string | null;
+    with_reactions: number;
+    top_reactions: number;
+    avg_reactions: number | null;
   }>`
     SELECT
       COUNT(*)::int AS count,
       MIN(published_at)::text AS oldest,
       MAX(published_at)::text AS newest,
-      MAX(created_at)::text AS latest_created
+      MAX(created_at)::text AS latest_created,
+      COUNT(*) FILTER (WHERE reactions > 0)::int AS with_reactions,
+      COALESCE(MAX(reactions), 0)::int AS top_reactions,
+      AVG(NULLIF(reactions, 0))::float8 AS avg_reactions
     FROM posts
   `;
 
@@ -83,6 +92,9 @@ export async function getSettingsSnapshot(): Promise<SettingsSnapshot> {
       newest: statsRow?.newest ?? null,
     },
     postsCreatedAt: statsRow?.latest_created ?? null,
+    postsWithReactions: statsRow?.with_reactions ?? 0,
+    topReactions: statsRow?.top_reactions ?? 0,
+    avgReactions: statsRow?.avg_reactions ?? null,
     lastSavedAt: lastCandidates.length ? lastCandidates[lastCandidates.length - 1]! : null,
   };
 }

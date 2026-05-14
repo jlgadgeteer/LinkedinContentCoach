@@ -119,12 +119,19 @@ const PostInput = z.object({
   date: z.string().optional(),
   published_at: z.string().optional(),
   word_count: z.number().int().optional(),
+  reactions: z.number().int().nonnegative().optional(),
+  comments: z.number().int().nonnegative().optional(),
+  likes: z.number().int().nonnegative().optional(),
+  reposts: z.number().int().nonnegative().optional(),
 });
 
 async function insertPosts(rows: z.infer<typeof PostInput>[]): Promise<void> {
   for (const p of rows) {
     await sql`
-      INSERT INTO posts (external_id, url, hook, text, published_at, word_count, created_at)
+      INSERT INTO posts (
+        external_id, url, hook, text, published_at, word_count,
+        reactions, comments, likes, reposts, created_at
+      )
       VALUES (
         ${p.id ?? p.external_id ?? null},
         ${p.url ?? null},
@@ -132,6 +139,10 @@ async function insertPosts(rows: z.infer<typeof PostInput>[]): Promise<void> {
         ${p.text},
         ${p.published_at ?? p.date ?? null}::timestamptz,
         ${p.word_count ?? p.text.split(/\s+/).filter(Boolean).length},
+        ${p.reactions ?? 0},
+        ${p.comments ?? 0},
+        ${p.likes ?? 0},
+        ${p.reposts ?? 0},
         now()
       )
     `;

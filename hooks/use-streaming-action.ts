@@ -9,6 +9,7 @@ export type ActionPayload = {
   topic?: string;
   draft?: string;
   query?: string;
+  mode?: string;
   original?: string;
   instruction?: string;
 };

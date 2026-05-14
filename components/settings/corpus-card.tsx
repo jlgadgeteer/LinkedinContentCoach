@@ -31,11 +31,17 @@ export function CorpusCard({
   oldest,
   newest,
   indexedAt,
+  topReactions,
+  avgReactions,
+  postsWithReactions,
 }: {
   postCount: number;
   oldest: string | null;
   newest: string | null;
   indexedAt: string | null;
+  topReactions?: number;
+  avgReactions?: number | null;
+  postsWithReactions?: number;
 }) {
   const [addState, addAction, addPending] = useActionState(addPostsAction, initial);
   const [replaceState, replaceAction, replacePending] = useActionState(
@@ -85,6 +91,16 @@ export function CorpusCard({
           }
         />
         <Stat label="Last loaded" value={formatTimestamp(indexedAt)} />
+        {(postsWithReactions ?? 0) > 0 ? (
+          <>
+            <Stat label="With reactions" value={`${postsWithReactions}`} />
+            <Stat
+              label="Avg reactions"
+              value={avgReactions != null ? avgReactions.toFixed(0) : "—"}
+            />
+            <Stat label="Top reactions" value={topReactions != null ? String(topReactions) : "—"} />
+          </>
+        ) : null}
       </div>
 
       {mode === "idle" ? (
@@ -111,7 +127,7 @@ export function CorpusCard({
             variant="mono"
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={`[\n  { "date": "2024-09-12", "text": "...", "hook": "...", "url": "..." }\n]`}
+            placeholder={`[\n  {\n    "date": "2024-09-12",\n    "text": "...",\n    "hook": "...",\n    "url": "...",\n    "reactions": 124,\n    "comments": 18,\n    "reposts": 7\n  }\n]`}
             style={{ minHeight: 180 }}
             spellCheck={false}
           />
