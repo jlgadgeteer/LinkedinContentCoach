@@ -5,6 +5,7 @@ import { z } from "zod";
 import { sql } from "@vercel/postgres";
 import { encryptApiKey, decryptApiKey } from "@/lib/crypto";
 import { testProvider } from "@/lib/test-provider";
+import { isMissingRelationOrColumn } from "@/lib/db/safe-query";
 
 export type CardState = { error: string | null; ok: string | null };
 
@@ -14,86 +15,113 @@ const ProviderSave = z.object({
   apiKey: z.string().optional(),
 });
 
+function friendlyError(err: unknown, fallback: string): string {
+  if (isMissingRelationOrColumn(err)) {
+    return (
+      "The database schema looks out of date. Open Settings → Backup → Run schema check, " +
+      "then try again."
+    );
+  }
+  if (err instanceof Error) return err.message;
+  return fallback;
+}
+
 export async function saveProviderSettingsAction(
   _prev: CardState,
   formData: FormData,
 ): Promise<CardState> {
-  const parsed = ProviderSave.safeParse({
-    provider: formData.get("provider"),
-    model: formData.get("model"),
-    apiKey: formData.get("apiKey"),
-  });
-  if (!parsed.success) return { error: "Provider and model are required.", ok: null };
-
-  const newKey = (parsed.data.apiKey ?? "").trim();
-
-  if (newKey) {
-    const testErr = await testProvider({
-      provider: parsed.data.provider,
-      model: parsed.data.model,
-      apiKey: newKey,
+  try {
+    const parsed = ProviderSave.safeParse({
+      provider: formData.get("provider"),
+      model: formData.get("model"),
+      apiKey: formData.get("apiKey"),
     });
-    if (testErr) return { error: `Provider rejected the test request. ${testErr}`, ok: null };
-    const encrypted = await encryptApiKey(newKey);
-    await sql`
-      INSERT INTO config (id, provider, model, encrypted_api_key, last_verified_at, updated_at)
-      VALUES (1, ${parsed.data.provider}, ${parsed.data.model}, ${encrypted}, now(), now())
-      ON CONFLICT (id) DO UPDATE SET
-        provider = EXCLUDED.provider,
-        model = EXCLUDED.model,
-        encrypted_api_key = EXCLUDED.encrypted_api_key,
-        last_verified_at = now(),
-        updated_at = now()
-    `;
-  } else {
-    await sql`
-      UPDATE config SET
-        provider = ${parsed.data.provider},
-        model = ${parsed.data.model},
-        updated_at = now()
-      WHERE id = 1
-    `;
-  }
+    if (!parsed.success) return { error: "Provider and model are required.", ok: null };
 
-  revalidatePath("/settings");
-  return { error: null, ok: "Saved." };
+    const newKey = (parsed.data.apiKey ?? "").trim();
+
+    if (newKey) {
+      const testErr = await testProvider({
+        provider: parsed.data.provider,
+        model: parsed.data.model,
+        apiKey: newKey,
+      });
+      if (testErr)
+        return {
+          error: `Provider rejected the test request. ${testErr}`,
+          ok: null,
+        };
+      const encrypted = await encryptApiKey(newKey);
+      await sql`
+        INSERT INTO config (id, provider, model, encrypted_api_key, last_verified_at, updated_at)
+        VALUES (1, ${parsed.data.provider}, ${parsed.data.model}, ${encrypted}, now(), now())
+        ON CONFLICT (id) DO UPDATE SET
+          provider = EXCLUDED.provider,
+          model = EXCLUDED.model,
+          encrypted_api_key = EXCLUDED.encrypted_api_key,
+          last_verified_at = now(),
+          updated_at = now()
+      `;
+    } else {
+      await sql`
+        UPDATE config SET
+          provider = ${parsed.data.provider},
+          model = ${parsed.data.model},
+          updated_at = now()
+        WHERE id = 1
+      `;
+    }
+
+    revalidatePath("/settings");
+    return { error: null, ok: "Saved." };
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("[content-coach] saveProviderSettingsAction failed", err);
+    return { error: friendlyError(err, "Couldn't save the provider settings."), ok: null };
+  }
 }
 
 export async function testProviderAction(
   _prev: CardState,
   formData: FormData,
 ): Promise<CardState> {
-  const provider = formData.get("provider")?.toString();
-  const model = formData.get("model")?.toString();
-  const apiKeyInput = formData.get("apiKey")?.toString().trim();
+  try {
+    const provider = formData.get("provider")?.toString();
+    const model = formData.get("model")?.toString();
+    const apiKeyInput = formData.get("apiKey")?.toString().trim();
 
-  if (provider !== "anthropic" && provider !== "openai") {
-    return { error: "Pick a provider first.", ok: null };
-  }
-  if (!model) return { error: "Pick a model first.", ok: null };
-
-  let apiKey = apiKeyInput ?? "";
-  if (!apiKey) {
-    const row = await sql<{ encrypted_api_key: string | null }>`SELECT encrypted_api_key FROM config WHERE id = 1 LIMIT 1`;
-    const enc = row.rows[0]?.encrypted_api_key;
-    if (!enc) return { error: "No stored key. Paste one above and try again.", ok: null };
-    const decoded = await decryptApiKey(enc);
-    if (!decoded) {
-      return {
-        error:
-          "Stored key won't decrypt. AUTH_PASSWORD may have been rotated; paste your key again.",
-        ok: null,
-      };
+    if (provider !== "anthropic" && provider !== "openai") {
+      return { error: "Pick a provider first.", ok: null };
     }
-    apiKey = decoded;
+    if (!model) return { error: "Pick a model first.", ok: null };
+
+    let apiKey = apiKeyInput ?? "";
+    if (!apiKey) {
+      const row = await sql<{ encrypted_api_key: string | null }>`SELECT encrypted_api_key FROM config WHERE id = 1 LIMIT 1`;
+      const enc = row.rows[0]?.encrypted_api_key;
+      if (!enc) return { error: "No stored key. Paste one above and try again.", ok: null };
+      const decoded = await decryptApiKey(enc);
+      if (!decoded) {
+        return {
+          error:
+            "Stored key won't decrypt. AUTH_PASSWORD may have been rotated; paste your key again.",
+          ok: null,
+        };
+      }
+      apiKey = decoded;
+    }
+
+    const err = await testProvider({ provider, model, apiKey });
+    if (err) return { error: `Provider rejected the request. ${err}`, ok: null };
+
+    await sql`UPDATE config SET last_verified_at = now(), updated_at = now() WHERE id = 1`;
+    revalidatePath("/settings");
+    return { error: null, ok: "Connection OK." };
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error("[content-coach] testProviderAction failed", err);
+    return { error: friendlyError(err, "Couldn't test the provider."), ok: null };
   }
-
-  const err = await testProvider({ provider, model, apiKey });
-  if (err) return { error: `Provider rejected the request. ${err}`, ok: null };
-
-  await sql`UPDATE config SET last_verified_at = now(), updated_at = now() WHERE id = 1`;
-  revalidatePath("/settings");
-  return { error: null, ok: "Connection OK." };
 }
 
 export async function saveVoiceSettingsAction(
