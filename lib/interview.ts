@@ -1,6 +1,7 @@
 import "server-only";
 import { sql } from "@vercel/postgres";
 import type { InterviewStatus } from "@/lib/db/schema";
+import { safeQuery } from "@/lib/db/safe-query";
 import {
   DIMENSIONS,
   DIMENSION_LABEL,
@@ -43,28 +44,34 @@ function parseDimension(s: string | null): Dimension | null {
 }
 
 export async function listSessions(limit = 20): Promise<SessionRow[]> {
-  const rows = await sql<{
-    id: string;
-    started_at: string;
-    ended_at: string | null;
-    status: InterviewStatus;
-    questions_count: number;
-    summary: string | null;
-  }>`
-    SELECT id::text, started_at::text, ended_at::text, status,
-           questions_count, summary
-    FROM interview_sessions
-    ORDER BY started_at DESC
-    LIMIT ${limit}
-  `;
-  return rows.rows.map((r) => ({
-    id: r.id,
-    startedAt: r.started_at,
-    endedAt: r.ended_at,
-    status: r.status,
-    questionsCount: r.questions_count,
-    summary: r.summary,
-  }));
+  return safeQuery(
+    async () => {
+      const rows = await sql<{
+        id: string;
+        started_at: string;
+        ended_at: string | null;
+        status: InterviewStatus;
+        questions_count: number;
+        summary: string | null;
+      }>`
+        SELECT id::text, started_at::text, ended_at::text, status,
+               questions_count, summary
+        FROM interview_sessions
+        ORDER BY started_at DESC
+        LIMIT ${limit}
+      `;
+      return rows.rows.map((r) => ({
+        id: r.id,
+        startedAt: r.started_at,
+        endedAt: r.ended_at,
+        status: r.status,
+        questionsCount: r.questions_count,
+        summary: r.summary,
+      }));
+    },
+    [] as SessionRow[],
+    "interview.list_sessions",
+  );
 }
 
 export async function getSessionDetail(id: string): Promise<SessionDetail | null> {

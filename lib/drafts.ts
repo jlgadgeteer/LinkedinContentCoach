@@ -1,6 +1,7 @@
 import "server-only";
 import { sql } from "@vercel/postgres";
 import type { DraftStatus } from "@/lib/db/schema";
+import { safeQuery } from "@/lib/db/safe-query";
 
 export type DraftSummary = {
   id: string;
@@ -32,96 +33,127 @@ export function excerptFromBody(body: string, n = 160): string {
 }
 
 export async function listDrafts(): Promise<DraftSummary[]> {
-  const rows = await sql<{
-    id: string;
-    title: string;
-    topic: string | null;
-    body: string;
-    status: DraftStatus;
-    scheduled_for: string | null;
-    created_at: string;
-    updated_at: string;
-  }>`
-    SELECT id::text, title, topic, body, status,
-           scheduled_for::text AS scheduled_for,
-           created_at::text AS created_at,
-           updated_at::text AS updated_at
-    FROM drafts
-    ORDER BY
-      CASE status WHEN 'scheduled' THEN 0 WHEN 'not_published' THEN 1 ELSE 2 END,
-      COALESCE(scheduled_for, updated_at) DESC
-  `;
-  return rows.rows.map((r) => ({
-    id: r.id,
-    title: r.title,
-    topic: r.topic,
-    excerpt: excerptFromBody(r.body),
-    status: r.status,
-    scheduledFor: r.scheduled_for,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-  }));
+  return safeQuery(
+    async () => {
+      const rows = await sql<{
+        id: string;
+        title: string;
+        topic: string | null;
+        body: string;
+        status: DraftStatus;
+        scheduled_for: string | null;
+        created_at: string;
+        updated_at: string;
+      }>`
+        SELECT id::text, title, topic, body, status,
+               scheduled_for::text AS scheduled_for,
+               created_at::text AS created_at,
+               updated_at::text AS updated_at
+        FROM drafts
+        ORDER BY
+          CASE status WHEN 'scheduled' THEN 0 WHEN 'not_published' THEN 1 ELSE 2 END,
+          COALESCE(scheduled_for, updated_at) DESC
+      `;
+      return rows.rows.map((r) => ({
+        id: r.id,
+        title: r.title,
+        topic: r.topic,
+        excerpt: excerptFromBody(r.body),
+        status: r.status,
+        scheduledFor: r.scheduled_for,
+        createdAt: r.created_at,
+        updatedAt: r.updated_at,
+      }));
+    },
+    [] as DraftSummary[],
+    "drafts.list",
+  );
 }
 
 export async function getDraftById(id: string): Promise<DraftFull | null> {
-  const rows = await sql<{
-    id: string;
-    title: string;
-    topic: string | null;
-    body: string;
-    status: DraftStatus;
-    scheduled_for: string | null;
-    created_at: string;
-    updated_at: string;
-  }>`
-    SELECT id::text, title, topic, body, status,
-           scheduled_for::text AS scheduled_for,
-           created_at::text AS created_at,
-           updated_at::text AS updated_at
-    FROM drafts
-    WHERE id = ${id}::uuid
-    LIMIT 1
-  `;
-  const r = rows.rows[0];
-  if (!r) return null;
-  return {
-    id: r.id,
-    title: r.title,
-    topic: r.topic,
-    body: r.body,
-    excerpt: excerptFromBody(r.body),
-    status: r.status,
-    scheduledFor: r.scheduled_for,
-    createdAt: r.created_at,
-    updatedAt: r.updated_at,
-  };
+  return safeQuery(
+    async () => {
+      const rows = await sql<{
+        id: string;
+        title: string;
+        topic: string | null;
+        body: string;
+        status: DraftStatus;
+        scheduled_for: string | null;
+        created_at: string;
+        updated_at: string;
+      }>`
+        SELECT id::text, title, topic, body, status,
+               scheduled_for::text AS scheduled_for,
+               created_at::text AS created_at,
+               updated_at::text AS updated_at
+        FROM drafts
+        WHERE id = ${id}::uuid
+        LIMIT 1
+      `;
+      const r = rows.rows[0];
+      if (!r) return null;
+      return {
+        id: r.id,
+        title: r.title,
+        topic: r.topic,
+        body: r.body,
+        excerpt: excerptFromBody(r.body),
+        status: r.status,
+        scheduledFor: r.scheduled_for,
+        createdAt: r.created_at,
+        updatedAt: r.updated_at,
+      };
+    },
+    null,
+    "drafts.by_id",
+  );
 }
 
 export async function listDraftsInRange(
   startIso: string,
   endIso: string,
 ): Promise<DraftSummary[]> {
-  const rows = await sql<{
-    id: string;
-    title: string;
-    topic: string | null;
-    body: string;
-    status: DraftStatus;
-    scheduled_for: string | null;
-    created_at: string;
-    updated_at: string;
-  }>`
-    SELECT id::text, title, topic, body, status,
-           scheduled_for::text AS scheduled_for,
-           created_at::text AS created_at,
-           updated_at::text AS updated_at
-    FROM drafts
-    WHERE scheduled_for IS NOT NULL
-      AND scheduled_for >= ${startIso}::timestamptz
-      AND scheduled_for <  ${endIso}::timestamptz
-    ORDER BY scheduled_for ASC
-  `;
-  return rows.rows.map((r) => ({
+  return safeQuery(
+    async () => {
+      const rows = await sql<{
+        id: string;
+        title: string;
+        topic: string | null;
+        body: string;
+        status: DraftStatus;
+        scheduled_for: string | null;
+        created_at: string;
+        updated_at: string;
+      }>`
+        SELECT id::text, title, topic, body, status,
+               scheduled_for::text AS scheduled_for,
+               created_at::text AS created_at,
+               updated_at::text AS updated_at
+        FROM drafts
+        WHERE scheduled_for IS NOT NULL
+          AND scheduled_for >= ${startIso}::timestamptz
+          AND scheduled_for <  ${endIso}::timestamptz
+        ORDER BY scheduled_for ASC
+      `;
+      return _shapeRowsForRange(rows.rows);
+    },
+    [] as DraftSummary[],
+    "drafts.in_range",
+  );
+}
+
+function _shapeRowsForRange(rows: Array<{
+  id: string;
+  title: string;
+  topic: string | null;
+  body: string;
+  status: DraftStatus;
+  scheduled_for: string | null;
+  created_at: string;
+  updated_at: string;
+}>): DraftSummary[] {
+  return rows.map((r) => ({
     id: r.id,
     title: r.title,
     topic: r.topic,
